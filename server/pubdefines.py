@@ -6,7 +6,7 @@ import time
 #全局注释
 
 #根目录名称
-SERVER_DIR_ROOT = "server_process"
+SERVER_DIR_ROOT = "server"
 
 #数据发送目标的角色
 CLIENT = 1

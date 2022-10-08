@@ -182,21 +182,7 @@ GPS和DBS数量应对应
 # ]
 
 SERVER_ALLOCATE = [
-	#Master Cluster Manager Server
-	{
-		"iServerID" 		:	0,
-		"sServerName"		:	"Master Cluster Manager",
-		"lstProcessConfig"	:	[
-			{
-				"iIndex"		:	1,
-				"sIP"			:	"localhost",
-				"iPort"			:	10001,
-				"iType"			:	MCM,
-				"iRole"			:	LEAD,
-				"iConcern"		:	2,
-			},
-		],
-	},
+	{},
 	#Logic Server1(index 为数组下标加1, iServerID为999加数组下标)
 	{
 		"iServerID" 		:	1000,
@@ -213,7 +199,13 @@ SERVER_ALLOCATE = [
 				"iIndex"		:	2,
 				"sIP"			:	"localhost",
 				"iPort"			:	11002,
-				"iType"			:	LCM,
+				"iType"			:	GPS,
+			},
+			{
+				"iIndex"		:	3,
+				"sIP"			:	"localhost",
+				"iPort"			:	11003,
+				"iType"			:	DBS,
 			},
 		],
 	},
@@ -355,6 +347,8 @@ def GetConnects():
 		iConcernType = GPS | LGS
 
 	for dServer in SERVER_ALLOCATE:
+		if not dServer:
+			continue
 		lstConfigs = dServer["lstProcessConfig"]
 		if SERVER_ALLOCATE.index(dServer) == 0:
 			continue
@@ -363,15 +357,16 @@ def GetConnects():
 			if iConfigType & iConcernType:
 				lstResult.append((dServer["iServerID"], dConfig))
 
-	lstMCMConfig = SERVER_ALLOCATE[0]["lstProcessConfig"]
-	if iType == MCM and iRole == LEAD:
-		for dConfig1 in lstMCMConfig:
-			if dConfig1["iRole"] == FOLLOWER:
-				lstResult.append((0, dConfig1))
-	elif (iType == MCM and iRole == FOLLOWER) or iType == LCM:
-		for dConfig2 in lstMCMConfig:
-			if dConfig2["iRole"] == LEAD:
-				lstResult.append((0, dConfig2))
-				break
+	if SERVER_ALLOCATE[0]:
+		lstMCMConfig = SERVER_ALLOCATE[0]["lstProcessConfig"]
+		if iType == MCM and iRole == LEAD:
+			for dConfig1 in lstMCMConfig:
+				if dConfig1["iRole"] == FOLLOWER:
+					lstResult.append((0, dConfig1))
+		elif (iType == MCM and iRole == FOLLOWER) or iType == LCM:
+			for dConfig2 in lstMCMConfig:
+				if dConfig2["iRole"] == LEAD:
+					lstResult.append((0, dConfig2))
+					break
 
 	return lstResult
