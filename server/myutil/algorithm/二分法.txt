@@ -1,0 +1,24 @@
+def SearchBinary(lstTest,iNum):
+	iLeft=0
+	iRight=len(lstTest)-1
+	
+	while iLeft<=iRight:
+		iMiddle=int((iLeft+iRight)/2)
+		
+		if lstTest[iMiddle]<iNum:
+			iLeft=iMiddle+1
+		elif lstTest[iMiddle]==iNum:
+			return iMiddle
+		else:
+			iRight=iMiddle-1
+			
+	return None
+	
+if __name__=='__main__':
+	lstTest=[1,2,3,4,5,6,7,8,9]
+	iNum=10
+	if SearchBinary(lstTest,iNum)==None:
+		PrintDebug("Not Found")
+	else:
+		PrintDebug(SearchBinary(lstTest,iNum))
+	

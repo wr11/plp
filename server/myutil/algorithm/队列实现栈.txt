@@ -1,0 +1,56 @@
+class CStack:
+	def __init__(self):
+		self.queue1=[]
+		self.queue2=[]
+	
+	def Print(self):
+		PrintDebug(self.queue2+self.queue1)
+		
+	def NewPush(self,x):
+		if len(self.queue1)==0 and len(self.queue2)==0:
+			self.queue1.append(x)
+		elif len(self.queue1)==0 and len(self.queue2)>0:
+			self.queue2.append(x)
+		elif len(self.queue2)==0 and len(self.queue1)>0:
+			self.queue1.append(x)
+	
+	def NewPop(self):
+		if len(self.queue1)>0:
+			if len(self.queue1)==1:
+				key=self.queue1[0]
+				self.queue1.clear()
+				return key
+			else:
+				while len(self.queue1)>1:
+					self.queue2.append(self.queue1.pop(0))
+					key=self.queue1[0]
+				self.queue1.clear()
+				return key
+		elif len(self.queue1)==0 and len(self.queue2)==0:
+			PrintDebug("已经没有元素了")
+		else:
+			if len(self.queue2)==1:
+				key=self.queue2[0]
+				self.queue2.clear()
+				return key
+			else:
+				while len(self.queue2)>1:
+					self.queue1.append(self.queue2.pop(0))
+					key=self.queue2[0]
+				self.queue2.clear()
+				return key
+			
+	
+stack1=CStack()
+stack1.NewPush(1)
+stack1.NewPush(2)
+stack1.NewPush(3)
+stack1.NewPush(4)
+stack1.NewPush(5)
+stack1.NewPop()
+stack1.NewPop()
+stack1.NewPop()
+stack1.NewPop()
+stack1.NewPop()
+stack1.NewPop()
+stack1.Print()

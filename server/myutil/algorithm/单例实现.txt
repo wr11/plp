@@ -1,0 +1,19 @@
+class Singleton1
+	hasinstance=False
+	orig_instance=None
+	def __new__(cls)
+		if cls.hasinstance==False
+			cls.hasinstance=True
+			cls.orig_instance=super().__new__(cls)
+			return cls.orig_instance
+		else
+			return cls.orig_instance
+
+class C(Singleton1)
+	a=1
+
+c1 = C()
+c2 = C()
+PrintDebug(c1 is c2)
+PrintDebug(c1.a)
+PrintDebug(c2.a)
