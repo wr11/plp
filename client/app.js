@@ -1,4 +1,5 @@
 import {SERVER_IP, SERVER_PORT} from '/utils/globalconst.js'
+import {PacketPrepare, PacketAddI, PacketSend} from '/utils/netpackage.js'
 
 App({
 
@@ -51,6 +52,8 @@ App({
             duration: 2000
         })
         this.globalData.connectstate = true
+        let oNetPack = PacketPrepare(0x1000)
+        PacketSend(oNetPack)
       })
     oTcp.onMessage((message, remoteInfo, localInfo) => {
         console.log("receive message from server",message, remoteInfo, localInfo)
@@ -72,6 +75,14 @@ App({
             duration: 2000
         })
     })
+  },
+
+  GetTcpConnect: function(){
+    return this.globalData.tcpconn
+  },
+
+  GetConnectState: function(){
+    return this.globalData.connectstate
   },
 
   FillUserInfo: function(iPhoneNum){
