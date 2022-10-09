@@ -56,7 +56,7 @@ def ParseMQMessage(iMQHeader, data):
 
 def NetCommand(data):
 	oNetPackage = np.UnpackPrepare(data)
-	iDataHeader = np.UnpackI(oNetPackage)
+	iDataHeader = np.UnpackInt16(oNetPackage)
 	PrintNotify("receive header data %s" % iDataHeader)
 	if 0x100 <= iDataHeader < 0x1000:
 		if iDataHeader in RPC_PROTOCOL:
