@@ -76,7 +76,7 @@ def PacketAddInt32(iVal, oNetPack):
 
 def PacketAddInt64(iVal, oNetPack):
 	"""
-	无符号8字节整形 0-9223372036854775807 尽量少的使用，长整形可以转成字符串进行压包
+	无符号8字节整形 0-9223372036854775807 尽量少的使用(浪费空间，小程序js只支持到4字节)，长整形可以转成字符串进行压包
 	"""
 	if not isinstance(iVal, int):
 		iVal = int(iVal)
