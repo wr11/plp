@@ -1,33 +1,14 @@
 {
   "pages": [
     "pages/game/game",
-    "pages/user/user"
+    "pages/user/user",
+    "pages/login/login"
   ],
   "entryPagePath": "pages/game/game",
   "window": {
     "navigationBarTitleText": "漂流瓶",
     "navigationBarBackgroundColor": "#33CCFF",
-    "backgroundColor":"#33CCFF"
-  },
-  "tabBar": {
-    "color": "#000",
-    "selectedColor": "#33CCFF",
-    "backgroundColor": "#fff",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/game/game",
-        "iconPath": "resource/img/plp.jpg",
-        "text": "漂流瓶",
-        "selectedIconPath": "resource/img/plp.jpg"
-      },
-      {
-        "pagePath": "pages/user/user",
-        "iconPath": "resource/img/user.jpeg",
-        "text": "我的",
-        "selectedIconPath": "resource/img/user.jpeg"
-      }
-    ]
+    "backgroundColor": "#33CCFF"
   },
   "permission": {
     "scope.userLocation": {

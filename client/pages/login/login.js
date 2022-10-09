@@ -1,7 +1,4 @@
-// pages/index/index.js
-
-var app = getApp()
-
+// pages/login/login.js
 Page({
 
   /**
@@ -15,15 +12,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    var ret = app.InitUserInfo()
-    if (!ret){
-      wx.redirectTo({
-        url: '/pages/login/login',
-      })
-      wx.hideHomeButton({
-        success: (res) => {},
-      })
-    }
+
   },
 
   /**
