@@ -28,8 +28,7 @@ class CNetPackage:
 
 def PacketPrepare(header):
 	oNetPack = NetPackagePrepare()
-	byteHeader = struct.pack("H", header)
-	oNetPack.PackInto(byteHeader)
+	PacketAddInt16(header, oNetPack)
 	return oNetPack
 
 def PacketAddI(iVal, oNetPack):
