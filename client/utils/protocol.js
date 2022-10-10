@@ -1,0 +1,7 @@
+
+export const PROTOCOL = {
+  C2S_GMORDER : 0x1000,
+
+  C2S_HELLO : 0x1001,
+  S2C_HELLO : 0x1002
+}

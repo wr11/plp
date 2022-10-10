@@ -1,2 +1,27 @@
-<!--pages/login/login.wxml-->
-<text>pages/login/login.wxml</text>
+<view class="container">
+  <view class="acontainner">
+    <image src="/resource/img/icon.jpg" class="imgsty" />
+    <text class="aTextContainer">{{gamename}}</text>
+  </view>
+  <view class="inputView">
+    <input class="input" type="text" cursor-spacing="100" placeholder="请输入您的手机号"  maxlength="11"
+    placeholder-style="color: #c0c0c0" confirm-type='next' bindinput='getPhone'/>
+  </view>
+  <view class="passwordView">
+    <input class="input" password='true' type="text" placeholder="请输入您的密码"  maxlength="20"
+    placeholder-style="color: #c0c0c0" confirm-type='done' bindinput='getPassword'/>
+  </view>
+  <view class="bntView" bindtap='clickLogin' >
+    <button class='botton' type='primary' bindtap='clickLogin' ><text class='btnText' >登陆</text></button>
+  </view>
+  <view class="forgetpaswordView">
+    <text class="forgetpaswordText" bindtap='toChangePassword'>忘记密码</text>
+    <text class="regText" bindtap='toregister' space="emsp">   去注册</text>
+  </view>
+  <view class="bottomview">
+    <text class="bottomtext">539工作室</text>
+  </view>
+</view>
+
+
+

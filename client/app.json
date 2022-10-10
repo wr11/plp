@@ -2,9 +2,10 @@
   "pages": [
     "pages/game/game",
     "pages/user/user",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/loading/loading"
   ],
-  "entryPagePath": "pages/game/game",
+  "entryPagePath": "pages/loading/loading",
   "window": {
     "navigationBarTitleText": "漂流瓶",
     "navigationBarBackgroundColor": "#33CCFF",

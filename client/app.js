@@ -1,5 +1,6 @@
 import {SERVER_IP, SERVER_PORT} from '/utils/globalconst.js'
 import {NetPack} from '/utils/netpackage.js'
+import {netCommand} from '/utils/netcommand.js'
 
 App({
 
@@ -7,6 +8,7 @@ App({
    * 当小程序初始化完成时，会触发 onLaunch（全局只触发一次）
    */
   onLaunch: function () {
+    this.globalData.progress_percent = 25
     this.MakeConnection()
   },
 
@@ -34,7 +36,8 @@ App({
   globalData:{
     userinfo : null,
     tcpconn : null,
-    connectstate : false
+    connectstate : false,
+    progress_percent : 0
   },
 
   MakeConnection: function(){
@@ -46,27 +49,25 @@ App({
     })
     oTcp.onConnect(() => {
         console.log("connect to server success",SERVER_IP,SERVER_PORT)
-        wx.showToast({
-            title: '服务器连接成功',
-            icon: 'success',
-            duration: 2000
-        })
         this.globalData.connectstate = true
         let oNetPack = NetPack.PacketPrepare(0x1000)
-        NetPack.PacketAddS("hello 我是微信小程序客户端", oNetPack)
+        NetPack.PacketAddS("hello 我是微信小程序客户端0", oNetPack)
         NetPack.PacketSend(oNetPack)
+        this.connectcb(50)
       })
     oTcp.onMessage((message) => {
         let oNetPack = NetPack.UnpackPrepare(message.message)
         let header = NetPack.UnpackInt16(oNetPack)
-        let str = NetPack.UnpackString(oNetPack)
-        console.log("header",header)
-        console.log("stringdata",str)
+        netCommand(header, oNetPack)
+        // let str = NetPack.UnpackString(oNetPack)
+        // console.log("header",header)
+        // console.log("stringdata",str)
+        // this.connectcb(100)
     })
     oTcp.onClose(() => {
         console.log("disconnected with server",SERVER_IP,SERVER_PORT)
         wx.showToast({
-            title: '与服务器断开连接',
+            title: '与服务器连接失败',
             icon: 'error',
             duration: 2000
         })
@@ -90,11 +91,8 @@ App({
     return this.globalData.connectstate
   },
 
-  FillUserInfo: function(iPhoneNum){
-    var userinfo = {
-      phone: iPhoneNum
-    }
-    this.globalData.userinfo = userinfo
+  FillUserInfo: function(userdata){
+    this.globalData.userinfo = userdata
 
     wx.setStorageSync('userinfo', this.globalData.userinfo)
   },
@@ -109,13 +107,18 @@ App({
     }
   },
 
+  ModifyUserInfo: function(newuserdata){
+    this.globalData.userinfo = newuserdata
+    wx.removeStorageSync('userinfo')
+    wx.setStorageSync('userinfo', this.globalData.userinfo)
+  },
+
   GetUserInfo: function(){
     return this.globalData.userinfo
   },
 
   RemoveUserInfo: function(){
     this.globalData.userinfo = null
-
     wx.removeStorageSync('userinfo')
   }
 })

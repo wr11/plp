@@ -1,0 +1,6 @@
+<!--pages/loading/loading.wxml-->
+<text>pages/loading/loading.wxml</text>
+<progress percent="{{progress_percent}}" 
+  active active-mode="forwards" stroke-width="8" border-radius="30" duration = "40"
+  bindactiveend="finishLoad"
+/>

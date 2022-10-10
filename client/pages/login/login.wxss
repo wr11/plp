@@ -1,1 +1,89 @@
 /* pages/login/login.wxss */
+.container{
+  display: flex;
+  flex-direction:column;
+  justify-content: space-around;
+}
+.acontainner{
+  display: flex;
+  flex-direction:column;
+}
+.imgsty{
+  border-radius: 100rpx;
+  width:180rpx;
+  height: 180rpx;
+  display: flex;
+  align-self: center;
+  margin-top: 150rpx;
+}
+.aTextContainer{
+  font-size: 20px;
+  display: flex;
+  align-self: center;
+  margin-top: 25rpx;
+}
+.input{
+    padding-left: 10px;
+    height: 78rpx;
+    caret-color: #000000;
+}
+.inputView{
+  border: 4rpx solid rgb(15, 15, 1);
+  width: 600rpx;
+  border-radius: 80rpx;
+  margin-left: 100rpx;
+  margin-right: 100rpx;
+  margin-top: 130rpx;
+}
+.passwordView{
+  border: 4rpx solid rgb(0, 0, 0);
+  width: 600rpx;
+  border-radius: 80rpx;
+  margin-left: 100rpx;
+  margin-right: 100rpx;
+  margin-top: 40rpx;
+}
+.bntView{
+  border-radius: 80rpx;
+  width: 400rpx;
+  height: 100rpx;
+  margin-left: 100rpx;
+  margin-right: 100rpx;
+  margin-top: 40rpx;
+  align-self: center;
+}
+
+.botton{
+  background-color: #3ba3ed;
+  border-radius: 80rpx;
+  border: 4rpx solid rgb(1, 5, 15);
+  align-self: center;
+}
+.forgetpaswordText{
+  font-size: 33rpx;
+  color: #c0c0c0;
+}
+.regText{
+  font-size: 33rpx;
+  color: #3ba3ed;
+}
+.forgetpaswordView{
+  display: flex;
+  justify-content: space-between;
+  padding: 40rpx 120rpx;
+}
+.btnText{
+  font-size: 16px;
+  color: white;
+}
+.bottomview{
+  display: flex;
+  justify-content: space-between;
+  padding: 20rpx 120rpx;
+  margin-top:100rpx;
+  align-self: center;
+}
+.bottomtext{
+  font-size: 26rpx;
+  color:black
+}

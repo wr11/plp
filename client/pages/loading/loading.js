@@ -1,21 +1,24 @@
-// pages/index/index.js
+// pages/loading/loading.js
 
-var app = getApp()
+let app = getApp()
 
 Page({
-
   /**
    * 页面的初始数据
    */
   data: {
-
+    progress_percent : app.globalData.progress_percent
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    
+    app.connectcb = this.updateProgress
+
+    wx.hideHomeButton({
+      success: (res) => {},
+    })
   },
 
   /**
@@ -71,5 +74,31 @@ Page({
    */
   onShareAppMessage() {
 
+  },
+
+  updateProgress(progress) {
+    this.setData({progress_percent:progress})
+  },
+
+  finishLoad(){
+    wx.showToast({
+      icon: "success",
+      title: '加载完成',
+    })
+    setTimeout(this.finishLoad2, 2000)
+  },
+
+  finishLoad2(){
+    let ret = app.InitUserInfo()
+    if (!ret){
+      wx.redirectTo({
+        url: '/pages/login/login',
+      })
+    }
+    else{
+      wx.redirectTo({
+        url: '/pages/game/game',
+      })
+    }
   }
 })
