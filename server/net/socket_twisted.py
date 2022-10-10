@@ -115,7 +115,7 @@ class CServer(twisted.internet.protocol.Protocol):
 		sHost = self.transport.getPeer().host
 		iPort = self.transport.getPeer().port
 		tFlag = (sHost, iPort)
-		PutData((MQ_DATARECEIVED, data))
+		PutData((MQ_DATARECEIVED, (0, data)))
 
 class CBaseServerFactory(twisted.internet.protocol.Factory):
 	protocol = CServer
@@ -157,8 +157,7 @@ class CClientServer(twisted.internet.protocol.Protocol):
 		iPort = self.transport.getPeer().port
 		tFlag = (sHost, iPort)
 		PrintNotify("client data received")
-		PrintDebug("-----------------",data)
-		PutData((MQ_DATARECEIVED, data))
+		PutData((MQ_DATARECEIVED, (self.m_ClientConnectID, data)))
 
 class CClientServerFactory(twisted.internet.protocol.Factory):
 	protocol = CClientServer
@@ -168,6 +167,7 @@ def run(oSendMq, oRecvMq, oConfInitFunc):
 	global g_Connect
 	oConfInitFunc()
 	mylog.Init("NET")
+	hotfix.Init()
 
 	mq.SetMq(oSendMq, MSGQUEUE_SEND)
 	mq.SetMq(oRecvMq, MSGQUEUE_RECV)

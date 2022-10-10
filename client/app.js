@@ -53,11 +53,15 @@ App({
         })
         this.globalData.connectstate = true
         let oNetPack = NetPack.PacketPrepare(0x1000)
-        NetPack.PacketAddS("中文ffffghj", oNetPack)
+        NetPack.PacketAddS("hello 我是微信小程序客户端", oNetPack)
         NetPack.PacketSend(oNetPack)
       })
-    oTcp.onMessage((message, remoteInfo, localInfo) => {
-        console.log("receive message from server",message, remoteInfo, localInfo)
+    oTcp.onMessage((message) => {
+        let oNetPack = NetPack.UnpackPrepare(message.message)
+        let header = NetPack.UnpackInt16(oNetPack)
+        let str = NetPack.UnpackString(oNetPack)
+        console.log("header",header)
+        console.log("stringdata",str)
     })
     oTcp.onClose(() => {
         console.log("disconnected with server",SERVER_IP,SERVER_PORT)

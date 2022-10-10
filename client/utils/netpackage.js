@@ -4,17 +4,12 @@
 
 import {ARRAYBUFFER_UTILS, STRING_ARRAYBUFFER} from 'handlebytes.js'
 
-const TYPE_NAME2TYPE_ARRY_LEN = {
-    "B" : Uint8Array.BYTES_PER_ELEMENT,
-    "H" : Uint16Array.BYTES_PER_ELEMENT,
-    "I" : Uint32Array.BYTES_PER_ELEMENT
-}
-
 class CNetPackage{
   constructor(arraybuffer){
     this.m_Offset = 0
     this.m_DataList = []
     this.m_ArrayBuffer = arraybuffer
+    this.m_DataView = null
   }
 
   PackInto(sType, data){
@@ -24,6 +19,35 @@ class CNetPackage{
   PackAll(){
     let tmpBuffer = ARRAYBUFFER_UTILS.concact(this.m_DataList)
     this.m_ArrayBuffer = tmpBuffer
+  }
+
+  UnpackPrepare(){
+    this.m_DataView = new DataView(this.m_ArrayBuffer)
+  }
+
+  Unpack(sType, iStrLen = 0){
+    switch (sType){
+      case "B":
+        let data1 = this.m_DataView.getUint8(this.m_Offset, true)
+        this.m_Offset += 1
+        return data1
+      case "H":
+        let data2 = this.m_DataView.getUint16(this.m_Offset, true)
+        this.m_Offset += 2
+        return data2
+      case "I":
+        let data3 = this.m_DataView.getUint32(this.m_Offset, true)
+        this.m_Offset += 4
+        return data3
+      case "S":
+        let data4 = this.UnpackString(iStrLen)
+        this.m_Offset += iStrLen
+        return data4
+    }
+  }
+
+  UnpackString(iStrLen){
+    return STRING_ARRAYBUFFER.dataview2string(this.m_DataView, this.m_Offset, iStrLen)
   }
 }
 
@@ -84,5 +108,43 @@ export const NetPack = {
     }
     let conn = app.GetTcpConnect()
     conn.write(oNetPack.m_ArrayBuffer)
+  },
+
+  UnpackPrepare: function UnpackPrepare(arraybuffer){
+    let oNetPack = new CNetPackage(arraybuffer)
+    oNetPack.UnpackPrepare()
+    return oNetPack
+  },
+
+  UnpackInt8: function UnpackInt8(oNetPack){
+    return oNetPack.Unpack("B")
+  },
+
+  UnpackInt16: function UnpackInt16(oNetPack){
+    return oNetPack.Unpack("H")
+  },
+
+  UnpackInt32: function UnpackInt32(oNetPack){
+    return oNetPack.Unpack("I")
+  },
+
+  UnpackString: function UnpackString(oNetPack){
+    let iBt = this.UnpackInt8(oNetPack)
+    let iLen = 0
+    if (iBt == 1){
+      iLen = this.UnpackInt8(oNetPack)
+    }
+    else if (iBt == 2){
+      iLen = this.UnpackInt16(oNetPack)
+    }
+    else if (iBt == 4){
+      iLen = this.UnpackInt32(oNetPack)
+    }
+    else{
+      iLen = this.UnpackInt32(oNetPack)
+      console.log("netpack: string len exceeded!")
+    }
+
+    return oNetPack.Unpack("S", iLen)
   }
 }

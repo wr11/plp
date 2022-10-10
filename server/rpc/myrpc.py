@@ -387,6 +387,7 @@ def _BaseBlockCall(iServer, iIndex, sTatgetFunc, args, kwargs):
 	oPacket = CRPCPacket()
 	oRpc.InitCall(cb, oPacket, sTatgetFunc, *args, **kwargs)
 	oRpc.CallFunc(iServer, iIndex)
+	return oFuture
 
 class RpcException(Exception):
 	pass

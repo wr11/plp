@@ -1,9 +1,9 @@
 export const STRING_ARRAYBUFFER = {
   string2arraybuffer : function stringToArrayBuffer(str) {
-        var bytes = new Array(); 
-        var len,c;
+        let bytes = new Array(); 
+        let len,c;
         len = str.length;
-        for(var i = 0; i < len; i++){
+        for(let i = 0; i < len; i++){
             c = str.charCodeAt(i);
             if(c >= 0x010000 && c <= 0x10FFFF){
                 bytes.push(((c >> 18) & 0x07) | 0xF0);
@@ -21,42 +21,47 @@ export const STRING_ARRAYBUFFER = {
                 bytes.push(c & 0xFF);
             }
         }
-        var array = new Int8Array(bytes.length);
-        for(var i in bytes){
+        let array = new Int8Array(bytes.length);
+        for(let i in bytes){
             array[i] =bytes[i];
         }
         return array.buffer;
     },
 
-    arraybuffer2string : function arrayBufferToString(arr){
-        if(typeof arr === 'string') {  
-            return arr;  
-        }  
-        var dataview=new DataView(arr.data);
-        var ints=new Uint8Array(arr.data.byteLength);
-        for(var i=0;i<ints.length;i++){
-        ints[i]=dataview.getUint8(i);
+  arraybufferview2string : function arraybufferview2string(arraybufferview){
+    let arr=arraybufferview;
+    let str = '',
+    _arr = arr;
+    for(let i = 0; i < _arr.length; i++) {
+      let one = _arr[i].toString(2),
+      v = one.match(/^1+?(?=0)/);
+      if(v && one.length == 8) {
+        let bytesLength = v[0].length;
+        let store = _arr[i].toString(2).slice(7 - bytesLength);
+        for(let st = 1; st < bytesLength; st++) {
+          store += _arr[st + i].toString(2).slice(2);
         }
-        arr=ints;
-        var str = '',  
-            _arr = arr;  
-        for(var i = 0; i < _arr.length; i++) {  
-            var one = _arr[i].toString(2),  
-                v = one.match(/^1+?(?=0)/);  
-            if(v && one.length == 8) {  
-                var bytesLength = v[0].length;  
-                var store = _arr[i].toString(2).slice(7 - bytesLength);  
-                for(var st = 1; st < bytesLength; st++) {  
-                    store += _arr[st + i].toString(2).slice(2);  
-                }  
-                str += String.fromCharCode(parseInt(store, 2));  
-                i += bytesLength - 1;  
-            } else {  
-                str += String.fromCharCode(_arr[i]);  
-            }  
-        }  
-        return str; 
+        str += String.fromCharCode(parseInt(store, 2));
+        i += bytesLength - 1;
+      } else {
+        str += String.fromCharCode(_arr[i]);
+      }
     }
+    return str;
+  },
+
+  dataview2string : function dataview2string(dataview, iOffset, iLen){
+    let arraybuffer = new ArrayBuffer(iLen)
+    let newview = new Uint8Array(arraybuffer)
+    let iIndex = iOffset
+    for (let i = iOffset; i < iLen + iOffset; i++){
+      let data = dataview.getUint8(iIndex)
+      newview[i - iOffset] = data
+      iIndex += 1
+    }
+
+    return this.arraybufferview2string(newview)
+  }
 }
 
 export const ARRAYBUFFER_UTILS = {

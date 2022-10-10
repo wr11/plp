@@ -3,7 +3,6 @@
 tornado协程简化版
 """
 
-from asyncio import CancelledError
 from types import GeneratorType
 from timer import Call_out
 

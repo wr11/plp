@@ -107,8 +107,9 @@ def PacketAddS(sVal, oNetPack):
 		PacketAddInt8(8, oNetPack)
 	else:
 		PacketAddInt8(8, oNetPack)
-		print("netpack: string len exceeded!")
+		PrintError("netpack: string len exceeded!")
 	PacketAddI(iLen, oNetPack)
+	PrintDebug("sending data 2 client...",iLen)
 	if iLen == 1:
 		PacketAddC(sEncodeStr, oNetPack)
 	else:
@@ -196,7 +197,6 @@ def UnpackS(oNetPackage):
 	else:
 		iLen = UnpackInt64(oNetPackage)
 		PrintWarning("netpack: string len exceeded!")
-	PrintDebug("-----------", iBt, iLen)
 	if iLen == 1:
 		return UnpackC(oNetPackage)
 	else:

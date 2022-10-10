@@ -16,10 +16,10 @@ class CNetCommand:
 			C2S_GMORDER : ln.NetCommand
 		}
 
-	def CallCommand(self, iHeader, oNetPackage, who=None):
+	def CallCommand(self, iConnectID, iHeader, oNetPackage, who=None):
 		func = self.m_Map.get(iHeader, None)
 		if func:
-			func(who, oNetPackage)
+			func(iConnectID, oNetPackage)
 
 def MQMessage(tData):
 	iMQProto, data = tData
@@ -54,7 +54,8 @@ def ParseMQMessage(iMQHeader, data):
 	elif iMQHeader == MQ_DATARECEIVED:
 		NetCommand(data)
 
-def NetCommand(data):
+def NetCommand(tData):
+	iConnectID, data = tData
 	oNetPackage = np.UnpackPrepare(data)
 	iDataHeader = np.UnpackInt16(oNetPackage)
 	PrintNotify("receive header data %s" % iDataHeader)
@@ -64,4 +65,4 @@ def NetCommand(data):
 			data = np.UnpackEnd(oNetPackage)
 			rpc.Receive(iDataHeader, data)
 	elif iDataHeader >= 0x1000:
-		CNetCommand().CallCommand(iDataHeader, oNetPackage)
+		CNetCommand().CallCommand(iConnectID, iDataHeader, oNetPackage)
