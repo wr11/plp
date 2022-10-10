@@ -58,11 +58,11 @@ App({
     oTcp.onMessage((message) => {
         let oNetPack = NetPack.UnpackPrepare(message.message)
         let header = NetPack.UnpackInt16(oNetPack)
-        netCommand(header, oNetPack)
-        // let str = NetPack.UnpackString(oNetPack)
-        // console.log("header",header)
-        // console.log("stringdata",str)
-        // this.connectcb(100)
+        // netCommand(header, oNetPack)
+        let str = NetPack.UnpackString(oNetPack)
+        console.log("header",header)
+        console.log("stringdata",str)
+        this.connectcb(100)
     })
     oTcp.onClose(() => {
         console.log("disconnected with server",SERVER_IP,SERVER_PORT)
