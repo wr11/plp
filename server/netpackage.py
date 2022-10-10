@@ -75,7 +75,7 @@ def PacketAddInt32(iVal, oNetPack):
 
 def PacketAddInt64(iVal, oNetPack):
 	"""
-	无符号8字节整形 0-9223372036854775807 尽量少的使用(浪费空间，小程序js只支持到4字节)，长整形可以转成字符串进行压包
+	无符号8字节整形 0-9223372036854775807 尽量不使用(浪费空间，小程序js只支持到4字节)，长整形可以转成字符串进行压包
 	"""
 	if not isinstance(iVal, int):
 		iVal = int(iVal)
@@ -93,14 +93,26 @@ def PacketAddC(char, oNetPack):
 
 def PacketAddS(sVal, oNetPack):
 	"""
-	默认最长4294967295字节，需要限制字符串长度
+	默认最长4294967295,8字节的长度最好不要用，需要限制字符串长度
 	"""
-	iLen = len(sVal)
-	PacketAddInt32(iLen, oNetPack)
-	if iLen == 1:
-		PacketAddC(sVal, oNetPack)
+	sEncodeStr = sVal.encode('utf-8')
+	iLen = len(sEncodeStr)
+	if iLen <= 255:
+		PacketAddInt8(1, oNetPack)
+	elif 255 < iLen <= 65535:
+		PacketAddInt8(2, oNetPack)
+	elif 65535 < iLen <= 4294967295:
+		PacketAddInt8(4, oNetPack)
+	elif 4294967296 < iLen <= 9223372036854775807:
+		PacketAddInt8(8, oNetPack)
 	else:
-		byteData = struct.pack('%ss' % len(sVal), sVal.encode("utf-8"))
+		PacketAddInt8(8, oNetPack)
+		print("netpack: string len exceeded!")
+	PacketAddI(iLen, oNetPack)
+	if iLen == 1:
+		PacketAddC(sEncodeStr, oNetPack)
+	else:
+		byteData = struct.pack('%ss' % len(sEncodeStr), sEncodeStr)
 		if byteData:
 			oNetPack.PackInto(byteData)
 
@@ -157,7 +169,7 @@ def UnpackInt32(oNetPackage):
 
 def UnpackInt64(oNetPackage):
 	"""
-	无符号8字节整形 0-9223372036854775807 尽量少的使用，长整形可以转成字符串进行压包
+	无符号8字节整形 0-9223372036854775807 尽量不使用，长整形可以转成字符串进行压包
 	"""
 	return int(oNetPackage.Unpack("Q"))
 
@@ -171,7 +183,20 @@ def UnpackS(oNetPackage):
 	"""
 	默认最长4294967295字节，需要限制字符串长度
 	"""
-	iLen = UnpackInt32(oNetPackage)
+	iBt = UnpackInt8(oNetPackage)
+	iLen = 0
+	if iBt == 1:
+		iLen = UnpackInt8(oNetPackage)
+	elif iBt == 2:
+		iLen = UnpackInt16(oNetPackage)
+	elif iBt == 4:
+		iLen = UnpackInt32(oNetPackage)
+	elif iBt == 8:
+		iLen = UnpackInt64(oNetPackage)
+	else:
+		iLen = UnpackInt64(oNetPackage)
+		PrintWarning("netpack: string len exceeded!")
+	PrintDebug("-----------", iBt, iLen)
 	if iLen == 1:
 		return UnpackC(oNetPackage)
 	else:

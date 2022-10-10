@@ -1,5 +1,5 @@
 export const STRING_ARRAYBUFFER = {
-    addstring2arraybuffer : function stringToArrayBuffer(arrbuffer, offset, str) {
+  string2arraybuffer : function stringToArrayBuffer(str) {
         var bytes = new Array(); 
         var len,c;
         len = str.length;
