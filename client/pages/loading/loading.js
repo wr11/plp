@@ -3,6 +3,7 @@
 import {SERVER_IP, SERVER_PORT} from '../../utils/globalconst.js'
 import {NetPack, netCommand} from '../../utils/netpackage.js'
 import {PROTOCOL} from '../../utils/protocol.js'
+import {LOGIN_ERRCODE} from '../../utils/globalconst.js'
 
 let app = getApp()
 
@@ -233,7 +234,15 @@ Page({
     }
     let iRet = NetPack.UnpackInt8(oNetPack)
     console.log("login ret ------------", iRet)
-    if (iRet < 0){return}
+    if (iRet > 10){
+      let iNewRet = iRet - 10
+      let sMsg = LOGIN_ERRCODE[iNewRet]
+      wx.showToast({
+        icon: "error",
+        title: sMsg
+      })
+      return
+    }
     this.updateProgress(100)
   },
 

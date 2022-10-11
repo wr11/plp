@@ -1,6 +1,0 @@
-<!--pages/openid/getopenid.wxml-->
-<button bindtap="getOpenID">获取openid</button>
-<view class="container">
-  <text>code: {{code}}</text>
-  <text>openid: {{openid}}</text>
-</view>

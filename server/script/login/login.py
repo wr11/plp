@@ -8,12 +8,13 @@ import script.player as player
 def Login(iConnectID, oNetPackage):
 	sOpenID = np.UnpackS(oNetPackage)
 	del oNetPackage
-	iRet = CheckRole(sOpenID)
-	if iRet <= 0:
-		S2CLoginFailed(sOpenID, iRet)
-		return
 	who = player.MakePlayer(sOpenID, iConnectID)
 	player.AddPlayer(sOpenID, iConnectID, who)
+	iRet = CheckRole(sOpenID)
+	if iRet > 10:
+		S2CLoginFailed(sOpenID, iRet)
+		player.RemovePlayer(sOpenID, iConnectID)
+		return
 	PrintNotify("%s login success"%sOpenID)
 	S2CLoginSuccess(sOpenID)
 

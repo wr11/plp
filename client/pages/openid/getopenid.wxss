@@ -1,6 +1,0 @@
-/* pages/openid/getopenid.wxss */
-.container{
-  display: flex;
-  flex-direction:column;
-  justify-content: space-around;
-}

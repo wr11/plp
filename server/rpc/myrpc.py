@@ -329,7 +329,7 @@ def _OnResponseErr(lstInfo):
 		PrintWarning("err rpc object has unload%s"%lstInfo[0])
 		return
 	oCallBack = oRpc.m_CallBackBuff.Get(lstInfo[2])
-	if not oCallBack:
+	if (not oCallBack) and (lstInfo[2] != 0):
 		PrintWarning("err rpccallback object has deleted%s"%lstInfo[2])
 		return
 	oCallBack.ExecErr()
@@ -342,7 +342,7 @@ def _OnResponse(lstInfo):
 		PrintWarning("rpc object has unload%s %s"%tFlag)
 		return
 	oCallBack = oRpc.m_CallBackBuff.Get(lstInfo[2])
-	if not oCallBack:
+	if (not oCallBack) and (lstInfo[2] != 0):
 		PrintWarning("rpccallback object has deleted%s"%lstInfo[2])
 		return
 	oCallBack.ExecCallBack(lstInfo[3], lstInfo[4])
