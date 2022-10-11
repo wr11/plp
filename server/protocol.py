@@ -14,7 +14,16 @@ SS_RESPONSEERR = 0x102
 SS_IDENTIFY =  0x103
 
 #---------------CS----------------
+#客户端发起，需要服务端回调的共用一个协议号, 所有客户端与服务端协议都要加入regist中，gate据此拦截无效请求
 C2S_GMORDER = 0x1000
+CS_HELLO = 0x1001
+CS_GETAPPFLAG = 0x1002
+CS_LOGIN = 0x1003
 
-C2S_HELLO = 0x1001
-S2C_HELLO = 0x1002
+REGIST = [
+	C2S_GMORDER, CS_HELLO, CS_GETAPPFLAG
+]
+
+GATEHANDLE = [
+	CS_HELLO, CS_GETAPPFLAG
+]

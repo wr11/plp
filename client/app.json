@@ -3,7 +3,8 @@
     "pages/game/game",
     "pages/user/user",
     "pages/login/login",
-    "pages/loading/loading"
+    "pages/loading/loading",
+    "pages/openid/getopenid"
   ],
   "entryPagePath": "pages/loading/loading",
   "window": {

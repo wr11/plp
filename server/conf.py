@@ -39,7 +39,7 @@ SERVER_CONF = {
 		"iInterval" : 0.1,
 
 		"bAutoReloadOpen" : True,		#在isdebug为true才会起作用，即正式环境永不开启autoreload
-		"iAutoReloadInterval" : 3,
+		"iAutoReloadInterval" : 1.5,
 		"iManulReloadInterval" : 3,
 	},
 	"mysql" : {
@@ -289,6 +289,15 @@ def IsDBS():
 
 def IsMCM():
 	return LOCAL_SERVERCONFIG["iType"] == MCM
+
+def GetGate():
+	return (1000, 1)
+
+def GetGPS():
+	return (1000, 2)
+
+def GetDBS():
+	return (1000, 3)
 
 #@CacheResult()
 def GetServerConfig(iServerID, iIndex):

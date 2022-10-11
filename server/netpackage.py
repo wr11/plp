@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# NOTE: unpack最后记得del netpack对象！！！！！！
+
 from pubdefines import CallManagerFunc
 
 import struct
@@ -26,9 +28,10 @@ class CNetPackage:
 	def UnpackEnd(self):
 		return self.m_BytesBuffer[self.m_Offset:]
 
-def PacketPrepare(header):
+def PacketPrepare(header = 0):
 	oNetPack = NetPackagePrepare()
-	PacketAddInt16(header, oNetPack)
+	if header:
+		PacketAddInt16(header, oNetPack)
 	return oNetPack
 
 def PacketAddI(iVal, oNetPack):
@@ -109,7 +112,6 @@ def PacketAddS(sVal, oNetPack):
 		PacketAddInt8(8, oNetPack)
 		PrintError("netpack: string len exceeded!")
 	PacketAddI(iLen, oNetPack)
-	PrintDebug("sending data 2 client...",iLen)
 	if iLen == 1:
 		PacketAddC(sEncodeStr, oNetPack)
 	else:
@@ -117,16 +119,37 @@ def PacketAddS(sVal, oNetPack):
 		if byteData:
 			oNetPack.PackInto(byteData)
 
-def PacketSend(iLink, oNetPack):
-	oMq = mq.GetMq(pubdefines.MSGQUEUE_SEND)
-	bData = oNetPack.m_BytesBuffer
-	if oMq:
-		if oMq.full():
-			PrintWarning("net work delay")
+def PacketSend(link, oNetPack):
+	import conf
+	if conf.IsGate():
+		oMq = mq.GetMq(pubdefines.MSGQUEUE_SEND)
+		bData = oNetPack.m_BytesBuffer
+		if oMq:
+			if oMq.full():
+				PrintWarning("net work delay")
+				return
+			tFlag = CallManagerFunc("link", "GetClientLink", link)
+			oMq.put((pubdefines.CLIENT, tFlag, bData))
+		del oNetPack
+	elif conf.IsGPS():
+		import rpc
+		import script.player as player
+		iServer, iIndex = conf.GetGate()
+		iConnectID = player.GetConnectIDByOpenID(link)
+		if iConnectID < 0:
 			return
-		tFlag = CallManagerFunc("link", "GetClientLink", iLink)
-		oMq.put((pubdefines.CLIENT, tFlag, bData))
-	del oNetPack
+		rpc.RemoteCallFunc(iServer, iIndex, None, "netpackage.R_GateSend2Client", iConnectID, oNetPack.m_BytesBuffer)
+	else:
+		PrintError("the current process can not send data to client!")
+
+def R_GateSend2Client(response, iConnectID, data):
+	import conf
+	if not conf.IsGate():
+		PrintError("the current process can not send data to client direct!")
+		return
+	oNetPack = PacketPrepare()
+	PacketAddB(data, oNetPack)
+	PacketSend(iConnectID, oNetPack)
  
 def S2SPacketSend(iServer, iIndex, oNetPack):
 	oMq = mq.GetMq(pubdefines.MSGQUEUE_SEND)

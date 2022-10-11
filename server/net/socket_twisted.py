@@ -214,7 +214,7 @@ def SendMq_Handler():
 		if oProto:
 			oProto.transport.getHandle().sendall(bData)
 		else:
-			PrintWarning("No connect %s"%tFlag)
+			PrintWarning("No connect ", tFlag)
 	timer.Call_out(conf.GetInterval(), "SendMq_Handler", SendMq_Handler)
 
 def PutData(data):

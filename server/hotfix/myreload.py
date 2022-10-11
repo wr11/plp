@@ -74,10 +74,13 @@ def ReloadPyFile(sCurPath, sName, bReload, bNotifyNew):
 				lstMod.append(".".join(lstPath[i:]))
 			for sModName in lstMod:
 				obj = import_module(sModName)
-				oNewModule = reload(obj)
-			func = getattr(oNewModule, "OnReload", None)
-			if func:
-				func()
+				try:
+					oNewModule = reload(obj)
+					func = getattr(oNewModule, "OnReload", None)
+					if func:
+						func()
+				except Exception as e:
+					PrintError(e)
 	elif "." not in sName:
 		import os
 		sCurPath = sCurPath + "\%s"%sName

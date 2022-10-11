@@ -1,5 +1,9 @@
 // pages/loading/loading.js
 
+import {SERVER_IP, SERVER_PORT} from '../../utils/globalconst.js'
+import {NetPack, netCommand} from '../../utils/netpackage.js'
+import {PROTOCOL} from '../../utils/protocol.js'
+
 let app = getApp()
 
 Page({
@@ -7,15 +11,14 @@ Page({
    * 页面的初始数据
    */
   data: {
-    progress_percent : app.globalData.progress_percent
+    progress_percent : 0,
+    wxlogincode : ""
   },
 
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
-    app.connectcb = this.updateProgress
-
     wx.hideHomeButton({
       success: (res) => {},
     })
@@ -35,6 +38,7 @@ Page({
     wx.hideHomeButton({
       success: (res) => {},
     })
+    this.MakeConnection()
   },
 
   /**
@@ -76,29 +80,173 @@ Page({
 
   },
 
+  MakeConnection: function(){
+    this.updateProgress(10)
+    let that = this
+    const oTcp = wx.createTCPSocket()
+    app.globalData.tcpconn = oTcp
+    oTcp.connect({
+        address: SERVER_IP,
+        port: SERVER_PORT
+    })
+    oTcp.onConnect(() => {
+        console.log("connect to server success",SERVER_IP,SERVER_PORT)
+        app.globalData.connectstate = true
+        let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_HELLO, that.onServerHello)
+        NetPack.PacketSend(oNetPack)
+      })
+    oTcp.onMessage((message) => {
+        let oNetPack = NetPack.UnpackPrepare(message.message)
+        let header = NetPack.UnpackInt16(oNetPack)
+        netCommand(header, oNetPack)
+    })
+    oTcp.onClose(() => {
+        console.log("disconnected with server",SERVER_IP,SERVER_PORT)
+        wx.showToast({
+            title: '与服务器连接失败',
+            icon: 'error',
+            duration: 2000
+        })
+        app.globalData.connectstate = false
+    })
+    oTcp.onError((res) => {
+        console.log("connect to server failed",SERVER_IP,SERVER_PORT)
+        wx.showToast({
+            title: '服务器维护中，请稍后再试',
+            icon: 'error',
+            duration: 2000
+        })
+    })
+  },
+
+  onServerHello(state, oNetPack){
+    if (state == -1){
+      wx.showToast({
+        icon: "error",
+        title: '服务器连接异常，请重试',
+      })
+      return
+    }
+    this.updateProgress(25)
+    this.checkNeedLoginWX()
+  },
+
+  checkNeedLoginWX: function(){
+    let that = this
+    let userInfo = app.getUserInfo()
+    if (!userInfo){
+      this.WXLogin()
+      return
+    }
+    wx.checkSession({
+      success: function(){
+        that.serverLogin()
+        return
+      },
+      fail: function(){
+        that.WXLogin()
+        return
+      }
+    })
+  },
+    
+  WXLogin: function(){
+    this.getWXLoginCode(this.getAppFlag)
+  },
+
+  getAppFlag(code){
+    this.setData({wxlogincode: code})
+    this.updateProgress(50)
+    let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_GETAPPFLAG, this.getOpenID)
+    NetPack.PacketSend(oNetPack)
+  },
+
+  getOpenID(state, oNetPack){
+    if (state == -1){
+      wx.showToast({
+        icon: "error",
+        title: '服务器连接异常，请重试',
+      })
+      return
+    }
+    let that = this
+    let appID = NetPack.UnpackString(oNetPack)
+    let secretKey = NetPack.UnpackString(oNetPack)
+    wx.request({
+      url: "https://api.weixin.qq.com/sns/jscode2session?appid=" + appID + "&secret=" + secretKey + "&js_code=" + this.data.wxlogincode + "&grant_type=authorization_code",
+      success: function(result){
+        that.handleOpenIDSSKey(result.data.session_key, result.data.openid)
+      },
+      fail: function(result){
+        wx.showToast({
+          icon: "error",
+          title: '获取openID失败，请重试',
+        })
+      }
+    })
+  },
+
+  handleOpenIDSSKey(sessionKey, openID){
+    let userInfo = {
+      sessionKey : sessionKey,
+      openID : openID
+    }
+    app.initUserInfo(userInfo)
+    this.serverLogin()
+  },
+
+  getWXLoginCode(cbFunc){
+    wx.login({
+      timeout: 5000,
+      success: function(result){
+        cbFunc(result.code)
+      },
+      fail: function(result){
+        wx.showToast({
+          icon: "error",
+          title: '微信登录失败，请稍后重试'
+        })
+      }
+    })
+  },
+
   updateProgress(progress) {
+    console.log("progress",progress)
     this.setData({progress_percent:progress})
   },
 
+  serverLogin(){
+    this.updateProgress(70)
+    let openID = app.getUserInfo().openID
+    let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_LOGIN, this.serverLoginCB)
+    NetPack.PacketAddS(openID, oNetPack)
+    NetPack.PacketSend(oNetPack)
+  },
+
+  serverLoginCB(state, oNetPack){
+    if (state == -1){
+      wx.showToast({
+        icon: "error",
+        title: '服务器连接异常，请重试',
+      })
+      return
+    }
+    let iRet = NetPack.UnpackInt8(oNetPack)
+    console.log("login ret ------------", iRet)
+    if (iRet < 0){return}
+    this.updateProgress(100)
+  },
+
   finishLoad(){
+    if (this.data.progress_percent == 100){
+      setTimeout(this.finishLoad2, 300)
+    }
+  },
+
+  finishLoad2(){
     wx.showToast({
       icon: "success",
       title: '加载完成',
     })
-    setTimeout(this.finishLoad2, 2000)
-  },
-
-  finishLoad2(){
-    let ret = app.InitUserInfo()
-    if (!ret){
-      wx.redirectTo({
-        url: '/pages/login/login',
-      })
-    }
-    else{
-      wx.redirectTo({
-        url: '/pages/game/game',
-      })
-    }
   }
 })

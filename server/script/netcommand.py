@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+from mylog.logcmd import PrintWarning
 from protocol import *
-from pubdefines import CallManagerFunc
+from pubdefines import CallManagerFunc, APPID, SECRETKEY
 
 import script.login.net as ln
+import script.login.login as login
 import netpackage as np
+import conf
+import script.player as player
 
 RPC_PROTOCOL = [SS_RPCRESPONSE, SS_RPCCALL, SS_RESPONSEERR]
-
-if "g_ServerNum2Link" not in globals():
-	g_ServerNum2Link = {}
 
 class CNetCommand:
 	def __init__(self):
@@ -49,12 +50,16 @@ def ParseMQMessage(iMQHeader, data):
 		sHost, iPort, iConnectID = data
 		CallManagerFunc("link", "AddClientLink", sHost, iPort, iConnectID)
 	elif iMQHeader == MQ_CLIENTDISCONNECT:
+		import rpc
+		import conf
 		iConnectID = data[0]
 		CallManagerFunc("link", "DelClientLink", iConnectID)
+		iServer, iIndex = conf.GetGPS()
+		rpc.RemoteCallFunc(iServer, iIndex, None, "script.player.PlayerOffLine", iConnectID)
 	elif iMQHeader == MQ_DATARECEIVED:
-		NetCommand(data)
+		GateNetCommand(data)
 
-def NetCommand(tData):
+def GateNetCommand(tData):
 	iConnectID, data = tData
 	oNetPackage = np.UnpackPrepare(data)
 	iDataHeader = np.UnpackInt16(oNetPackage)
@@ -65,4 +70,40 @@ def NetCommand(tData):
 			data = np.UnpackEnd(oNetPackage)
 			rpc.Receive(iDataHeader, data)
 	elif iDataHeader >= 0x1000:
-		CNetCommand().CallCommand(iConnectID, iDataHeader, oNetPackage)
+		# CNetCommand().CallCommand(iDataHeader, oNetPackage)
+		if iDataHeader in GATEHANDLE:
+			GateHandle(iConnectID, iDataHeader)
+		else:
+			import rpc.myrpc as rpc
+			import conf
+			iServer, iIndex = conf.GetGPS()
+			rpc.RemoteCallFunc(iServer, iIndex, None, "script.netcommand.GPSNetCommand", iConnectID, data)
+
+def GPSNetCommand(oResPonse, iConnectID, data):
+	if not conf.IsGPS():
+		return
+	oNetPackage = np.UnpackPrepare(data)
+	iDataHeader = np.UnpackInt16(oNetPackage)
+	if iDataHeader == CS_LOGIN:
+		login.Login(iConnectID, oNetPackage)
+	else:
+		pass
+
+def GateHandle(iConnectID, iDataHeader):
+	if not conf.IsGate():
+		PrintWarning("client connect to not gate server ! ")
+		return
+	if iDataHeader == CS_HELLO:
+		SendHello(iConnectID)
+	elif iDataHeader == CS_GETAPPFLAG:
+		SendAppKey(iConnectID)
+
+def SendHello(iConnectID):
+	oNetPack = np.PacketPrepare(CS_HELLO)
+	np.PacketSend(iConnectID, oNetPack)
+
+def SendAppKey(iConnectID):
+	oNetPack = np.PacketPrepare(CS_GETAPPFLAG)
+	np.PacketAddS(APPID, oNetPack)
+	np.PacketAddS(SECRETKEY, oNetPack)
+	np.PacketSend(iConnectID, oNetPack)

@@ -4,6 +4,34 @@
 
 import {ARRAYBUFFER_UTILS, STRING_ARRAYBUFFER} from 'handlebytes.js'
 
+let PROTOCOL_CB
+if (typeof(PROTOCOL_CB) == "undefined"){
+  PROTOCOL_CB = {}
+}
+
+function removeProtocolCB(iProtocol){
+  if (iProtocol in PROTOCOL_CB){
+    let cbFunc = PROTOCOL_CB[iProtocol]
+    let state = -1 //表示超时
+    cbFunc(state, null)
+    delete PROTOCOL_CB[iProtocol]
+  }
+}
+
+export function netCommand(header, oNetPack){
+  if (! (header in PROTOCOL_CB)){
+    return
+  }
+  let cbFunc = PROTOCOL_CB[header]
+  delete PROTOCOL_CB[header]
+  try{
+    let state = 1 //表示回调成功
+    cbFunc(state, oNetPack)
+  } catch(err){
+    console.error(err)
+  }
+}
+
 class CNetPackage{
   constructor(arraybuffer){
     this.m_Offset = 0
@@ -52,7 +80,11 @@ class CNetPackage{
 }
 
 export const NetPack = {
-  PacketPrepare: function PacketPrepare (header) {
+  PacketPrepare: function PacketPrepare (header, cbFunc=null) {
+    if (cbFunc){
+      PROTOCOL_CB[header] = cbFunc
+    }
+    setTimeout(removeProtocolCB, 5000, header)
     let oNetPack = new CNetPackage(null)
     this.PacketAddI(header, oNetPack)
     return oNetPack
@@ -102,11 +134,11 @@ export const NetPack = {
   PacketSend: function PacketSend(oNetPack){
     let app = getApp()
     oNetPack.PackAll()
-    if (!app.GetConnectState()) {
+    if (!app.getConnectState()) {
       console.log("[error] disconnect with server, send data failed")
       return
     }
-    let conn = app.GetTcpConnect()
+    let conn = app.getTcpConnect()
     conn.write(oNetPack.m_ArrayBuffer)
   },
 

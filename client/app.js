@@ -1,15 +1,10 @@
-import {SERVER_IP, SERVER_PORT} from '/utils/globalconst.js'
-import {NetPack} from '/utils/netpackage.js'
-import {netCommand} from '/utils/netcommand.js'
-
 App({
 
   /**
    * 当小程序初始化完成时，会触发 onLaunch（全局只触发一次）
    */
   onLaunch: function () {
-    this.globalData.progress_percent = 25
-    this.MakeConnection()
+
   },
 
   /**
@@ -36,89 +31,28 @@ App({
   globalData:{
     userinfo : null,
     tcpconn : null,
-    connectstate : false,
-    progress_percent : 0
+    connectstate : false
   },
 
-  MakeConnection: function(){
-    const oTcp = wx.createTCPSocket()
-    this.globalData.tcpconn = oTcp
-    oTcp.connect({
-        address: SERVER_IP,
-        port: SERVER_PORT
-    })
-    oTcp.onConnect(() => {
-        console.log("connect to server success",SERVER_IP,SERVER_PORT)
-        this.globalData.connectstate = true
-        let oNetPack = NetPack.PacketPrepare(0x1000)
-        NetPack.PacketAddS("hello 我是微信小程序客户端0", oNetPack)
-        NetPack.PacketSend(oNetPack)
-        this.connectcb(50)
-      })
-    oTcp.onMessage((message) => {
-        let oNetPack = NetPack.UnpackPrepare(message.message)
-        let header = NetPack.UnpackInt16(oNetPack)
-        // netCommand(header, oNetPack)
-        let str = NetPack.UnpackString(oNetPack)
-        console.log("header",header)
-        console.log("stringdata",str)
-        this.connectcb(100)
-    })
-    oTcp.onClose(() => {
-        console.log("disconnected with server",SERVER_IP,SERVER_PORT)
-        wx.showToast({
-            title: '与服务器连接失败',
-            icon: 'error',
-            duration: 2000
-        })
-        this.globalData.connectstate = false
-    })
-    oTcp.onError((res) => {
-        console.log("connect to server failed",SERVER_IP,SERVER_PORT)
-        wx.showToast({
-            title: '服务器维护中，请稍后再试',
-            icon: 'error',
-            duration: 2000
-        })
-    })
-  },
-
-  GetTcpConnect: function(){
+  getTcpConnect: function(){
     return this.globalData.tcpconn
   },
 
-  GetConnectState: function(){
+  getConnectState: function(){
     return this.globalData.connectstate
   },
 
-  FillUserInfo: function(userdata){
-    this.globalData.userinfo = userdata
-
-    wx.setStorageSync('userinfo', this.globalData.userinfo)
+  initUserInfo: function(userdata){
+    wx.setStorageSync('userinfo', userdata)
   },
 
-  InitUserInfo: function(){
-    var res = wx.getStorageSync('userinfo')
-    if (res){
-      this.globalData.userinfo = res
-      return true
-    } else {
-      return false
+  getUserInfo: function(){
+    let globalUserInfo = this.globalData.userinfo
+    if (globalUserInfo){
+      return globalUserInfo
     }
-  },
-
-  ModifyUserInfo: function(newuserdata){
-    this.globalData.userinfo = newuserdata
-    wx.removeStorageSync('userinfo')
-    wx.setStorageSync('userinfo', this.globalData.userinfo)
-  },
-
-  GetUserInfo: function(){
-    return this.globalData.userinfo
-  },
-
-  RemoveUserInfo: function(){
-    this.globalData.userinfo = null
-    wx.removeStorageSync('userinfo')
+    let userInfo = wx.getStorageSync('userinfo')
+    this.globalData.userinfo = userInfo
+    return userInfo
   }
 })

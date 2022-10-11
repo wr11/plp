@@ -22,6 +22,10 @@ MYSQL_DICTCURSOR = "DictCursor"
 MYSQL_SSCURSOR = "SSCursor"
 MYSQL_SSDICTCURSOR = "SSDictCursor"
 
+#小程序appid,secretkey
+APPID = "wx4df313f347893eb8"
+SECRETKEY = "f7fef44a65e0678d1302ecf86f3f5925"
+
 #全局函数
 #全局对象管理
 if "g_GloabalManagerDict" not in globals():

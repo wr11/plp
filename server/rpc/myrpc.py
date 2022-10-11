@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
-from script.netcommand import g_ServerNum2Link
 from protocol import *
 from pubtool import CTimeOutManager
 from timer import *

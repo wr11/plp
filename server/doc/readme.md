@@ -15,7 +15,7 @@ o ---- object
 "g_"开头 + 驼峰名称 如：g_Flag
 注意全局变量声明时需要按照如下格式写:
 if "g_xxx" not in globals():
-    g_xxx = ...
+	g_xxx = ...
 用于防止热更时重置该变量
 
 ### 全局常量
@@ -48,11 +48,11 @@ import时统一从根目录开始（因为需要统一模块在sys.modules中的
 需要注意PrintDebug/PrintStack为debug环境下才会实际输出
 
 每个接口打印出颜色不同：
-PrintNotify     白色
-PrintDebug      梅色
-PrintError      红色
-PrintWarning    蓝色
-PrintStack      绿色
+PrintNotify	 白色
+PrintDebug	  梅色
+PrintError	  红色
+PrintWarning	蓝色
+PrintStack	  绿色
 （此颜色跨平台，均生效）
 
 打印内容及含义：
