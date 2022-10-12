@@ -4,12 +4,41 @@ import pymysql
 import pymysql.cursors
 import msgpack
 import pubdefines
+import timer
 
 MYSQL_SELECT = 1
 MYSQL_INSERT = 2
 MYSQL_UPDATE = 3
 MYSQL_MANUAL = 4
 MYSQL_HANDLE_TYPE = [MYSQL_SELECT, MYSQL_INSERT, MYSQL_UPDATE, MYSQL_MANUAL]
+
+class CMysqlConn:
+	def __init__(self, sCursorType=pubdefines.MYSQL_DICTCURSOR):
+		self.m_Config = {
+			"host":'localhost',
+			"user":'root',
+			"password":'mytool2021',
+			"db":'mytool_db',
+			"charset":'utf8',
+			"cursorclass":eval("pymysql.cursors.%s" % sCursorType),
+		}
+		self.m_Conn = self.MakeConnection()
+
+	def MakeConnection(self):
+		conn = pymysql.connect(**self.m_Config)
+		timer.Call_out(10*60, "CheckMysqlConnection", self.CheckConnection)
+
+	def GetConnection(self):
+		return self.m_Conn
+
+	def CheckConnection(self):
+		self.m_Conn.ping(reconnect = True)
+
+if "g_MysqlConn" not in globals():
+	g_MysqlConn = CMysqlConn()
+
+def GetMysqlConnect():
+	return g_MysqlConn.GetConnection()
 
 class CMysqlBase:
 
@@ -21,31 +50,17 @@ class CMysqlBase:
 	m_TblName = ""
 	m_ColName = ["data"]
 
-	def __init__(self, sCursorType=pubdefines.MYSQL_DICTCURSOR, sColNmae = ""):
-		self.m_Config = {
-			"host":'localhost',
-			"user":'root',
-			"password":'mytool2021',
-			"db":'mytool_db',
-			"charset":'utf8',
-			"cursorclass":eval("pymysql.cursors.%s" % sCursorType),
-		}
-		self.m_State = 1		#数据库查询状态 1-无查询，可以操作 0-正在查询，不可操作  todo目前不是异步，不用判断此状态
-		self.m_Data = {}
-		self.m_Conn = self.MakeConnection()
-		self.m_CursorType = sCursorType
+	def __init__(self, sColNmae = ""):
 		if sColNmae:
 			self.m_ColName.append(sColNmae)
+		self.m_Conn = GetMysqlConnect()
 
 	def __repr__(self):
 		cls = self.__class__
 		return "<%s %s(%d) at %s>" % (cls.__module__, cls.__name__, self.m_Type, self.m_State)
 
 	def __del__(self):
-		self.m_Conn.close()
-
-	def MakeConnection(self):
-		return pymysql.connect(**self.m_Config)
+		GetMysqlConnect().close()
 
 	def CheckConfig(self):
 		assert self.m_Type and self.m_TblName, "mysqlbase config wrong"
@@ -79,14 +94,14 @@ class CMysqlBase:
 		if iType not in MYSQL_HANDLE_TYPE:
 			PrintError("数据库操作类型错误")
 			return
-		with self.m_Conn.cursor() as oCursor:
+		with GetMysqlConnect().cursor() as oCursor:
 			if iType == MYSQL_MANUAL:
 				sSqlState = kwargs.get("Statement")
 			else:
 				sSqlState = self.GenerateSqlStatement(iType, **kwargs)
 			oCursor.execute(sSqlState)
 			result = oCursor.fetchall()
-		self.m_Conn.commit()
+		GetMysqlConnect().commit()
 
 		self.ResultInterrupt(result)
 		return result
