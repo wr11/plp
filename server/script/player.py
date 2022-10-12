@@ -4,7 +4,7 @@ if "PLAYER_LIST" not in globals():
 	PLAYER_LIST = {}
 
 if "CONNECTID2OPENID" not in globals():
-    CONNECTID2OPENID = {}
+	CONNECTID2OPENID = {}
 
 class CPlayer:
 	def __init__(self, sOpenID, iConnectID):

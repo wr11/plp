@@ -1,5 +1,11 @@
 # coding:utf-8
 
-class CDataShadow:
-    def __init__(self) -> None:
-        pass
+from datahub.mysql.mysqlbase import CMysqlBase
+
+class CDataShadow(CMysqlBase):
+	pass
+
+class CPlayerDataShadow(CDataShadow):
+	m_Type = "player"
+	m_TblName = "tbl_player"
+	m_ColName = ["data"]

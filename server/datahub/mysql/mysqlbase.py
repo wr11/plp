@@ -127,18 +127,18 @@ class CMysqlBase:
 
 
 #test
-class CTestSql(CMysqlBase):
+# class CTestSql(CMysqlBase):
 
-	m_Type = "test"
-	m_TblName = "test"
+# 	m_Type = "test"
+# 	m_TblName = "test"
 
 
-def main():
-	oTestMysql = CTestSql(pubdefines.MYSQL_DICTCURSOR, "test")
-	oTestMysql.Handler(MYSQL_INSERT, SetValue = "id=15332342922,test=123")
-	oTestMysql.Handler(MYSQL_SELECT, Filter = "test=123")
-	oTestMysql.Handler(MYSQL_UPDATE, SetValue = "test=124", Filter = "test=123")
-	result = oTestMysql.Handler(MYSQL_SELECT, Filter = "test=124")
-	result=oTestMysql.Handler(MYSQL_MANUAL, Statement = "select id from %s"%oTestMysql.m_TblName)
+# def main():
+# 	oTestMysql = CTestSql(pubdefines.MYSQL_DICTCURSOR, "test")
+# 	oTestMysql.Handler(MYSQL_INSERT, SetValue = "id=15332342922,test=123")
+# 	oTestMysql.Handler(MYSQL_SELECT, Filter = "test=123")
+# 	oTestMysql.Handler(MYSQL_UPDATE, SetValue = "test=124", Filter = "test=123")
+# 	result = oTestMysql.Handler(MYSQL_SELECT, Filter = "test=124")
+# 	result=oTestMysql.Handler(MYSQL_MANUAL, Statement = "select id from %s"%oTestMysql.m_TblName)
 
-	PrintDebug(result)
+# 	PrintDebug(result)
