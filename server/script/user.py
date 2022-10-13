@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import mysql.mysqlbase
 import pubdefines
 import time
 

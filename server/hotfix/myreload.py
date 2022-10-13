@@ -73,7 +73,10 @@ def ReloadPyFile(sCurPath, sName, bReload, bNotifyNew):
 			for i in range(iLen):
 				lstMod.append(".".join(lstPath[i:]))
 			for sModName in lstMod:
-				obj = import_module(sModName)
+				try:
+					obj = import_module(sModName)
+				except:
+					continue
 				try:
 					oNewModule = reload(obj)
 					func = getattr(oNewModule, "OnReload", None)

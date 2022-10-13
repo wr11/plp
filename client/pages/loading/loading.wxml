@@ -4,3 +4,4 @@
   active active-mode="forwards" stroke-width="8" border-radius="30" duration = "5"
   bindactiveend="finishLoad"
 />
+<button class='botton' type='primary' bindtap='openGM' >GM界面</button>

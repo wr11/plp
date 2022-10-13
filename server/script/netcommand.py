@@ -57,19 +57,21 @@ def ParseMQMessage(iMQHeader, data):
 		iServer, iIndex = conf.GetGPS()
 		rpc.RemoteCallFunc(iServer, iIndex, None, "script.player.PlayerOffLine", iConnectID)
 	elif iMQHeader == MQ_DATARECEIVED:
-		GateNetCommand(data)
+		OnNetCommand(data)
 
-def GateNetCommand(tData):
+def OnNetCommand(tData):
 	iConnectID, data = tData
 	oNetPackage = np.UnpackPrepare(data)
 	iDataHeader = np.UnpackInt16(oNetPackage)
 	PrintNotify("receive header data %s" % iDataHeader)
 	if 0x100 <= iDataHeader < 0x1000:
+		#所有服务器都有可能接收到rpc协议
 		if iDataHeader in RPC_PROTOCOL:
 			import rpc.myrpc as rpc
 			data = np.UnpackEnd(oNetPackage)
 			rpc.Receive(iDataHeader, data)
 	elif iDataHeader >= 0x1000:
+		#客户端协议只会在GATE接收
 		# CNetCommand().CallCommand(iDataHeader, oNetPackage)
 		if iDataHeader in GATEHANDLE:
 			GateHandle(iConnectID, iDataHeader)
@@ -86,6 +88,10 @@ def GPSNetCommand(oResPonse, iConnectID, data):
 	iDataHeader = np.UnpackInt16(oNetPackage)
 	if iDataHeader == CS_LOGIN:
 		login.Login(iConnectID, oNetPackage)
+	elif iDataHeader == C2S_GMORDER:
+		sOrder = np.UnpackS(oNetPackage)
+		PrintDebug(sOrder)
+		exec(sOrder)
 	else:
 		pass
 

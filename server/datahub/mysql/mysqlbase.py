@@ -18,7 +18,7 @@ class CMysqlConn:
 			"host":'localhost',
 			"user":'root',
 			"password":'mytool2021',
-			"db":'mytool_db',
+			"db":'db_plp',
 			"charset":'utf8',
 			"cursorclass":eval("pymysql.cursors.%s" % sCursorType),
 		}
@@ -27,6 +27,7 @@ class CMysqlConn:
 	def MakeConnection(self):
 		conn = pymysql.connect(**self.m_Config)
 		timer.Call_out(10*60, "CheckMysqlConnection", self.CheckConnection)
+		return conn
 
 	def GetConnection(self):
 		return self.m_Conn
@@ -43,67 +44,65 @@ def GetMysqlConnect():
 class CMysqlBase:
 
 	"""
-	m_ColName 必有data列
+	m_ColName 必有data列，以及ID列（用于唯一主键，字符串类型，不用int），且顺序为[id, data]
 	"""
 
 	m_Type = ""		#子类需对该属性重新赋值
 	m_TblName = ""
-	m_ColName = ["data"]
+	m_ColName = ["id", "data"]
 
-	def __init__(self, sColNmae = ""):
-		if sColNmae:
-			self.m_ColName.append(sColNmae)
+	def __init__(self):
 		self.m_Conn = GetMysqlConnect()
 
 	def __repr__(self):
 		cls = self.__class__
 		return "<%s %s(%d) at %s>" % (cls.__module__, cls.__name__, self.m_Type, self.m_State)
 
-	def __del__(self):
-		GetMysqlConnect().close()
-
 	def CheckConfig(self):
 		assert self.m_Type and self.m_TblName, "mysqlbase config wrong"
 
-	def GenerateSqlStatement(self, iType, **kwargs):
-		"""
-		kwargs param:
-		Filter: col_name >/</=/!= value 条件
-		SetValue： col_name1 = value1, col_name2 = value2 设值
-		"""
-		if iType == MYSQL_SELECT:			#查询语句
-			sFilter = kwargs.get("Filter")
-			assert sFilter
-			return "SELECT * FROM %s WHERE %s;" % (self. m_TblName, sFilter)
-		elif iType == MYSQL_INSERT:		#插入语句
-			sSetValue = kwargs.get("SetValue")
-			assert sSetValue
-			return "INSERT INTO %s SET %s;" % (self. m_TblName, sSetValue)
-		elif iType == MYSQL_UPDATE:		#更新语句
-			sFilter = kwargs.get("Filter")
-			sSetValue = kwargs.get("SetValue")
-			assert sFilter and sSetValue
-			return "UPDATE %s SET %s WHERE %s;" % (self. m_TblName, sSetValue, sFilter)
+	def GetPrimaryKey(self):
+		return self.m_ColName[0]
 
-	def Handler(self, iType, **kwargs):
+	def GenerateSqlStatement(self, iType):
+		if iType == MYSQL_SELECT:			#查询语句
+			return "SELECT * FROM %s WHERE %s=%s;" % (self.m_TblName, self.GetPrimaryKey(), "%s")
+		elif iType == MYSQL_INSERT:		#插入语句
+			iLen = len(self.m_ColName)
+			lstPos = ["%s"]*iLen
+			sAll = ",".join(lstPos)
+			return "INSERT INTO %s VALUES (%s);" % (self.m_TblName, sAll)
+		elif iType == MYSQL_UPDATE:		#更新语句
+			lstUpdateName = []
+			for sName in self.m_ColName:
+				lstUpdateName.append("%s=%s"%(sName))
+			sUpdate = ",".join(lstUpdateName)
+			return "UPDATE %s SET %s WHERE %s=%s;" % (self.m_TblName, sUpdate, self.GetPrimaryKey(), "%s")
+
+	def Handler(self, iType, *args, **kwargs):
 		"""
 		kwargs param:
 		Statement: 自定义语句
+
+		args顺序
+		select: where id=%s
+		insert: values(%s, %s, ...)
+		update: set id=%s,data=%s... WHERE id=%s
 		"""
 		self.CheckConfig()
 		if iType not in MYSQL_HANDLE_TYPE:
 			PrintError("数据库操作类型错误")
 			return
-		with GetMysqlConnect().cursor() as oCursor:
+		with self.m_Conn.cursor() as oCursor:
 			if iType == MYSQL_MANUAL:
 				sSqlState = kwargs.get("Statement")
 			else:
-				sSqlState = self.GenerateSqlStatement(iType, **kwargs)
-			oCursor.execute(sSqlState)
+				sSqlState = self.GenerateSqlStatement(iType)
+			# PrintDebug(sSqlState)
+			oCursor.execute(sSqlState, args)
 			result = oCursor.fetchall()
-		GetMysqlConnect().commit()
-
-		self.ResultInterrupt(result)
+		self.m_Conn.commit()
+		PrintDebug("mysql handler",iType, result)
 		return result
 
 	#todo 需要支持其他游标类型的解析

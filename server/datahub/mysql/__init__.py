@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import mysql.mysqlbase
+import datahub.mysql.mysqlbase
 
 def Init():
 	import sys

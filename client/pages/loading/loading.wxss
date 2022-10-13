@@ -1,1 +1,8 @@
 /* pages/loading/loading.wxss */
+.botton{
+  background-color: #3ba3ed;
+  border-radius: 80rpx;
+  border: 4rpx solid rgb(1, 5, 15);
+  align-self: center;
+  margin-top: 30rpx;
+}

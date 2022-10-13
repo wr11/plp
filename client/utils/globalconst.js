@@ -6,5 +6,6 @@ export const SERVER_IP = "127.0.0.1"
 export const SERVER_PORT = 21001
 
 export const LOGIN_ERRCODE = {
-  1:"数据加载失败",
+  1:"新建角色错误",
+  2:"角色数据错误"
 }

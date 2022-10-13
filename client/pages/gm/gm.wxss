@@ -1,0 +1,19 @@
+/* pages/gm/gm.wxss */
+.input{
+  padding-left: 10px;
+  height: 78rpx;
+  caret-color: #000000;
+}
+.inputView{
+border: 4rpx solid rgb(15, 15, 1);
+width: 750rpx;
+border-radius: 80rpx;
+margin-top: 30rpx;
+}
+.botton{
+  background-color: #3ba3ed;
+  border-radius: 80rpx;
+  border: 4rpx solid rgb(1, 5, 15);
+  align-self: center;
+  margin-top: 30rpx;
+}

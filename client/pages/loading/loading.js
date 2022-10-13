@@ -19,7 +19,7 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad(options) {
+  onShow(options) {
     wx.hideHomeButton({
       success: (res) => {},
     })
@@ -35,7 +35,7 @@ Page({
   /**
    * 生命周期函数--监听页面显示
    */
-  onShow() {
+  onLoad() {
     wx.hideHomeButton({
       success: (res) => {},
     })
@@ -256,6 +256,12 @@ Page({
     wx.showToast({
       icon: "success",
       title: '加载完成',
+    })
+  },
+
+  openGM(){
+    wx.navigateTo({
+      url: '../gm/gm',
     })
   }
 })

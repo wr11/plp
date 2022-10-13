@@ -1,0 +1,8 @@
+<!--pages/gm/gm.wxml-->
+<text>GM界面</text>
+<view class="inputView">
+  <input class="input" type="text" cursor-spacing="100" placeholder="请输入指令或代码"
+  placeholder-style="color: #c0c0c0" confirm-type='next' bindinput='getGMOrder'/>
+</view>
+
+<button class='botton' type='primary' bindtap='sendOrder' >发送指令</button>

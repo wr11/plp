@@ -288,11 +288,11 @@ class CRPCResponse:
 			oPack = np.PacketPrepare(SS_RESPONSEERR)
 			np.PacketAddB(oPacket.m_Data, oPack)
 			np.S2SPacketSend(self.m_SourceServer[0], self.m_SourceServer[1], oPack)
-			PrintError(e)
+			PrintError(func, e)
 
 def RemoteCallFunc(iServer, iIndex, oCallBack, sFunc, *args, **kwargs):
 	tFlag = (iServer, iIndex)
-	PrintNotify("remote call func start ...%s %s"%(iServer, iIndex))
+	# PrintNotify("remote call func start ...%s %s"%(iServer, iIndex))
 	oRpc = GetRpcObject(tFlag)
 	tLink = pubdefines.CallManagerFunc("link", "GetLink", tFlag[0], tFlag[1])
 	oPacket = CRPCPacket()
@@ -313,7 +313,7 @@ def Receive(iHeader, data):
 	oBuffer = BytesIO(data)
 	unpacker = msgpack.Unpacker(oBuffer, raw=False)
 	lstInfo = [unpacked for unpacked in unpacker]
-	PrintNotify("rpc remote receive %s"%str(lstInfo))
+	# PrintNotify("rpc remote receive %s"%str(lstInfo))
 	if iHeader == SS_RPCCALL:
 		oResponse = CRPCResponse(lstInfo)
 		oResponse.RemoteExcute()
@@ -328,8 +328,10 @@ def _OnResponseErr(lstInfo):
 	if not oRpc:
 		PrintWarning("err rpc object has unload%s"%lstInfo[0])
 		return
+	if lstInfo[2] == 0:		#不需要回调
+		return
 	oCallBack = oRpc.m_CallBackBuff.Get(lstInfo[2])
-	if (not oCallBack) and (lstInfo[2] != 0):
+	if not oCallBack:
 		PrintWarning("err rpccallback object has deleted%s"%lstInfo[2])
 		return
 	oCallBack.ExecErr()
