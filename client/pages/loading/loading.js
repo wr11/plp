@@ -104,7 +104,7 @@ Page({
     oTcp.onClose(() => {
         console.log("disconnected with server",SERVER_IP,SERVER_PORT)
         wx.showToast({
-            title: '与服务器连接失败',
+            title: '服务器连接丢失',
             icon: 'error',
             duration: 2000
         })

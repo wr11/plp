@@ -26,11 +26,11 @@ class CDataShadow(CMysqlBase):
 	def LoadDataFromDataBase(self):
 		lstData = self.Handler(MYSQL_SELECT, self.m_PrimaryData)
 		if not lstData:
-			return
+			return {}
 		sData = lstData[0]["data"]
 		data = unpackb(sData)
 		self.Load(data)
-		return lstData
+		return data
 
 	def Load(data):
 		#need overwrite

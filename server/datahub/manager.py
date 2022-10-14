@@ -4,19 +4,20 @@ import datahub.datashadow as shadow
 
 def LoadPlayerDataShadow(oResponse, sOpenID):
 	oShadow = shadow.CreatePlayerDataShadow(sOpenID)
-	sResult = oShadow.LoadDataFromDataBase()
-	if not sResult:
+	data = oShadow.LoadDataFromDataBase()
+	if not data:
 		try:
+			data = oShadow.Save()
 			CreateNewPlayer(oShadow)
 		except Exception as e:
-			oResponse(11)
+			oResponse(11, {})
 			PrintError(e)
 			return
 	else:
 		if not CheckDataValid(oShadow):
-			oResponse(12)
+			oResponse(12, {})
 			return
-	oResponse(1)
+	oResponse(1, data)
 
 def CreateNewPlayer(oShadow):
 	oShadow.SaveToDataBase()

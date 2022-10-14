@@ -83,6 +83,12 @@ class CPlayer:
 			self.SetSaveState("m_SendedNum", False)
 		return data
 
+	def Load(self, data):
+		if not data:
+			return
+		for sAttr, val in data.items():
+			setattr(self, sAttr, val)
+
 def MakePlayer(sOpenID, iConnectID):
 	return CPlayer(sOpenID, iConnectID)
 

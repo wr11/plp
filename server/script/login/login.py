@@ -12,7 +12,7 @@ def Login(iConnectID, oNetPackage):
 	del oNetPackage
 	who = player.MakePlayer(sOpenID, iConnectID)
 	player.AddPlayer(sOpenID, iConnectID, who)
-	iRet = yield CheckRole(sOpenID)
+	iRet = yield CheckRole(sOpenID)		#1为成功，10以上为失败码
 	if iRet > 10:
 		S2CLoginFailed(sOpenID, iRet)
 		player.RemovePlayer(sOpenID, iConnectID)
@@ -25,8 +25,12 @@ def CheckRole(sOpenID):
 	import rpc
 	import conf
 	iServer, iIndex = conf.GetDBS()
-	iRet = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadPlayerDataShadow", sOpenID)
-	raise Return(iRet)
+	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadPlayerDataShadow", sOpenID)
+	iCode, data = ret
+	iCode = int(iCode)
+	if data and iCode == 1:
+		player.GetOnlinePlayer(sOpenID).Load(data)
+	raise Return(iCode)
 
 def S2CLoginFailed(sOpenID, iRet):
 	oNetPack = np.PacketPrepare(CS_LOGIN)
