@@ -5,7 +5,7 @@ from pubdefines import SERVER_DIR_ROOT
 import conf
 import timer
 
-IGNORE_LIST = ["doc",]
+IGNORE_LIST = ["doc", "allocate",]
 
 def Init():
 	if not conf.IsDebug() or not conf.IsAutoReloadOpen():

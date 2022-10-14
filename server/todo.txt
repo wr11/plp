@@ -3,5 +3,5 @@
 3. 完善GM
 4. 测试player定时存盘以及下线存盘
 
-1.创建角色/DBS取出数据要同步到GPS中     testing
+1.创建角色/DBS取出数据要同步到GPS中	 testing
 2.玩家的sendlist需要去掉已经不保存的数据 

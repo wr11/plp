@@ -12,7 +12,7 @@ if "CONNECTID2OPENID" not in globals():
 	CONNECTID2OPENID = {}
 
 def Init():
-	Call_out(10, "saveplayer", SavePlayers)
+	Call_out(5*60, "saveplayer", SavePlayers)
 
 def SavePlayers():
 	global PLAYER_LIST
@@ -142,4 +142,4 @@ def PlayerOffLine(response, iConnectID):
 	else:
 		PrintWarning("player%s offline save failed!!!!!"%sOpenID)
 
-	Call_out(5*60, "reoffline", PlayerOffLine, None, iConnectID)
+		Call_out(5*60, "reoffline", PlayerOffLine, None, iConnectID)

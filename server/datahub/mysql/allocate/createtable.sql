@@ -1,0 +1,9 @@
+USE db_plp;
+
+DROP TABLE IF EXISTS tbl_game;
+
+CREATE TABLE tbl_game
+(
+	game_name VARCHAR(20) NOT NULL PRIMARY KEY,
+	data LONGBLOB NOT NULL
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT="玩法表";
