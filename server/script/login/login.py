@@ -30,6 +30,7 @@ def CheckRole(sOpenID):
 	iCode = int(iCode)
 	if data and iCode == 1:
 		player.GetOnlinePlayer(sOpenID).Load(data)
+		player.GetOnlinePlayer(sOpenID).m_Loaded = True
 	raise Return(iCode)
 
 def S2CLoginFailed(sOpenID, iRet):

@@ -80,3 +80,55 @@ class CPlayerDataShadow(CDataShadow):
 		for sAttr, playerdata in data:
 			setattr(self, sAttr, playerdata)
 		self.UpdateDataBase()
+
+# Game Shadow
+if "g_GameShadowList" not in globals():
+	g_GameShadowList = {}
+
+def CreateGameShadow(sGameName):
+	oOldShadow = GetGameShadowByGameName(sGameName)
+	if oOldShadow:
+		return oOldShadow
+	oShadow = CGameCtlShadow(sGameName)
+	g_GameShadowList[sGameName] = oShadow
+	return oShadow
+
+def GetGameShadowByGameName(sGameName):
+	return g_GameShadowList.get(sGameName, None)
+
+def RemoveGameShadow(sGameName):
+	if not GetGameShadowByGameName(sGameName):
+		return
+	del g_GameShadowList[sGameName]
+
+class CGameCtlShadow(CDataShadow):
+	m_Type = "game"
+	m_TblName = "tbl_game"
+	m_ColName = ["game_name", "data",]
+
+	def __init__(self, sGameName):
+		super(CGameCtlShadow, self).__init__(sGameName)
+		self.m_GameName = sGameName
+
+	def Setattr(self, lstAttr):
+		for sAttr in lstAttr:
+			setattr(self, sAttr, None)
+		self.m_SaveAttr = lstAttr
+
+	def Save(self):
+		data = {}
+		for sAttr in self.m_SaveAttr:
+			if hasattr(self, sAttr):
+				data[sAttr] = getattr(self, sAttr)
+		return data
+
+	def Load(self, data):
+		if not data:
+			return
+		for sAttr, val in data.items():
+			setattr(self, sAttr, val)
+
+	def Update(self, data):
+		for sAttr, playerdata in data:
+			setattr(self, sAttr, playerdata)
+		self.UpdateDataBase()

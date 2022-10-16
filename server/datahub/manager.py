@@ -2,6 +2,7 @@
 
 import datahub.datashadow as shadow
 
+# Player Shadow
 def LoadPlayerDataShadow(oResponse, sOpenID):
 	oShadow = shadow.CreatePlayerDataShadow(sOpenID)
 	data = oShadow.LoadDataFromDataBase()
@@ -26,11 +27,34 @@ def CheckDataValid(oShadow):
 	return True
 
 def UpdatePlayerShadowData(oResponse, data):
-	PrintDebug("update shadow",data)
+	PrintDebug("update player shadow",data)
 	for sOpenID, dData in data.items():
 		if not dData:
 			continue
 		oShadow = shadow.GetPlayerShadowByOpenID(sOpenID)
 		if not oShadow:
 			oShadow = shadow.CreatePlayerDataShadow(sOpenID)
+		oShadow.Update(dData)
+
+# Game Shadow
+def LoadGameShadow(oResponse, sGameName, lstAttr):
+	oShadow = shadow.CreateGameShadow(sGameName)
+	oShadow.Setattr(lstAttr)
+	data = oShadow.LoadDataFromDataBase()
+	if not data:
+		data = {}
+		CreateNewGameShadow(oShadow)
+	oResponse(data)
+
+def CreateNewGameShadow(oShadow):
+	oShadow.SaveToDataBase()
+
+def UpdateGameShadowData(oResponse, data):
+	PrintDebug("update game shadow",data)
+	for sGameName, dData in data.items():
+		if not dData:
+			continue
+		oShadow = shadow.GetGameShadowByGameName(sGameName)
+		if not oShadow:
+			oShadow = shadow.CreateGameShadow(sGameName)
 		oShadow.Update(dData)

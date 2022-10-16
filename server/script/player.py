@@ -26,6 +26,8 @@ def TrueSavePlayer(lstPlayer):
 	lstTemp = lstPlayer[0:50]
 	del lstPlayer[0:50]
 	for oPlayer in lstTemp:
+		if not oPlayer.m_Loaded:
+			continue
 		playerdata = oPlayer.Save()
 		data[oPlayer.m_OpenID] = playerdata
 	iServer, iIndex = conf.GetDBS()
@@ -47,6 +49,7 @@ class CPlayer:
 	def __init__(self, sOpenID, iConnectID):
 		self.m_OpenID = sOpenID
 		self.m_ConnectID = iConnectID
+		self.m_Loaded = False
 		self.m_SaveState = {
 			"m_SendedNum": False,
 			"m_SendedList": False,
