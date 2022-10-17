@@ -32,6 +32,8 @@ def Init():
 			continue
 		lstName.append(sGameName)
 		lstAttr = oGamectl.GetSaveAttrList()
+		if not lstAttr:
+			continue
 		iServer, iIndex = conf.GetDBS()
 		oFuture = rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadGameShadow", sGameName, lstAttr)
 		lstFuture = oFuture
@@ -51,7 +53,13 @@ def SaveGames():
 	global g_GameList
 	data = {}
 	for sGameName, oGameCtl in g_GameList.items():
-		data[sGameName] = oGameCtl.Save()
+		dGameData = oGameCtl.Save()
+		if not dGameData:
+			continue
+		data[sGameName] = dGameData
+		if hasattr(oGameCtl, "OnSave"):
+			func = oGameCtl.OnSave
+			func()
 	iServer, iIndex = conf.GetDBS()
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdateGameShadowData", data)
 
