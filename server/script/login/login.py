@@ -2,6 +2,7 @@
 
 from protocol import CS_LOGIN
 from myutil.mycorotine import coroutine, Return
+from pubdefines import GetPlayerProxy
 
 import netpackage as np
 import script.player as player
@@ -10,8 +11,7 @@ import script.player as player
 def Login(iConnectID, oNetPackage):
 	sOpenID = np.UnpackS(oNetPackage)
 	del oNetPackage
-	who = player.MakePlayer(sOpenID, iConnectID)
-	player.AddPlayer(sOpenID, iConnectID, who)
+	player.MakePlayer(sOpenID, iConnectID)
 	iRet = yield CheckRole(sOpenID)		#1为成功，10以上为失败码
 	if iRet > 10:
 		S2CLoginFailed(sOpenID, iRet)

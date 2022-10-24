@@ -3,6 +3,7 @@
 from myutil.mycorotine import coroutine, Return
 from timer import Call_out
 from gc import collect
+from pubdefines import GetPlayerProxy, IsProxyExist
 import rpc,conf
 
 if "PLAYER_LIST" not in globals():
@@ -37,10 +38,10 @@ def TrueSavePlayer(lstPlayer):
 	Call_out(2, "truesaveplayer", TrueSavePlayer, lstPlayer)
 
 @coroutine
-def SaveOnePlayer(oPlayer):
+def SaveOnePlayer(oPlayer_proxy):
 	data = {}
-	playerdata = oPlayer.Save()
-	data[oPlayer.m_OpenID] = playerdata
+	playerdata = oPlayer_proxy.Save()
+	data[oPlayer_proxy.m_OpenID] = playerdata
 	iServer, iIndex = conf.GetDBS()
 	ret = yield rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdatePlayerShadowData", data)
 	raise Return(ret)
@@ -93,7 +94,9 @@ class CPlayer:
 			setattr(self, sAttr, val)
 
 def MakePlayer(sOpenID, iConnectID):
-	return CPlayer(sOpenID, iConnectID)
+	oPlayer = CPlayer(sOpenID, iConnectID)
+	AddPlayer(sOpenID, iConnectID, oPlayer)
+	return oPlayer
 
 def AddPlayer(sOpenID, iConnectID, oPlayer):
 	global PLAYER_LIST, CONNECTID2OPENID
@@ -131,13 +134,14 @@ def GetOpenIDByConnectID(iConnectID):
 @coroutine
 def PlayerOffLine(response, iConnectID):
 	sOpenID = GetOpenIDByConnectID(iConnectID)
-	who = GetOnlinePlayer(sOpenID)
+	who_proxy = GetPlayerProxy(sOpenID)
+	if not IsProxyExist(who_proxy):
+		return
 	RemovePlayer(sOpenID, iConnectID)
-	who.m_OffLine = 1
-	return
-	ret = yield SaveOnePlayer(who)
+	who_proxy.m_OffLine = 1
+	ret = yield SaveOnePlayer(who_proxy)
 	if ret:
-		del who
+		del who_proxy
 
 		iServer, iIndex = conf.GetDBS()
 		rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.datashadow.RemovePlayerDataShadow", sOpenID)

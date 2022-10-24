@@ -11,17 +11,6 @@ import script.player as player
 
 RPC_PROTOCOL = [SS_RPCRESPONSE, SS_RPCCALL, SS_RESPONSEERR]
 
-class CNetCommand:
-	def __init__(self):
-		self.m_Map = {
-			C2S_GMORDER : ln.NetCommand
-		}
-
-	def CallCommand(self, iConnectID, iHeader, oNetPackage, who=None):
-		func = self.m_Map.get(iHeader, None)
-		if func:
-			func(iConnectID, oNetPackage)
-
 def MQMessage(tData):
 	iMQProto, data = tData
 	if iMQProto < 0x100:
@@ -72,14 +61,16 @@ def OnNetCommand(tData):
 			rpc.Receive(iDataHeader, data)
 	elif iDataHeader >= 0x1000:
 		#客户端协议只会在GATE接收
-		# CNetCommand().CallCommand(iDataHeader, oNetPackage)
+		if iDataHeader not in REGIST:
+			PrintWarning("protocol %s not registed"%iDataHeader)
+			return
 		if iDataHeader in GATEHANDLE:
-			GateHandle(iConnectID, iDataHeader)
-		else:
-			import rpc.myrpc as rpc
-			import conf
-			iServer, iIndex = conf.GetGPS()
-			rpc.RemoteCallFunc(iServer, iIndex, None, "script.netcommand.GPSNetCommand", iConnectID, data)
+			if GateHandle(iConnectID, iDataHeader):
+				return
+		import rpc.myrpc as rpc
+		import conf
+		iServer, iIndex = conf.GetGPS()
+		rpc.RemoteCallFunc(iServer, iIndex, None, "script.netcommand.GPSNetCommand", iConnectID, data)
 
 def GPSNetCommand(oResPonse, iConnectID, data):
 	if not conf.IsGPS():
@@ -98,11 +89,17 @@ def GPSNetCommand(oResPonse, iConnectID, data):
 def GateHandle(iConnectID, iDataHeader):
 	if not conf.IsGate():
 		PrintWarning("client connect to not gate server ! ")
-		return
+		return 1
 	if iDataHeader == CS_HELLO:
 		SendHello(iConnectID)
+		return 1
 	elif iDataHeader == CS_GETAPPFLAG:
 		SendAppKey(iConnectID)
+		return 1
+	elif iDataHeader == C2S_GMORDER:
+		# GM指令检查筛选
+		return 0
+	return 1
 
 def SendHello(iConnectID):
 	oNetPack = np.PacketPrepare(CS_HELLO)

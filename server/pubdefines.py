@@ -28,22 +28,22 @@ APPID = "wx4df313f347893eb8"
 SECRETKEY = "f7fef44a65e0678d1302ecf86f3f5925"
 
 #玩家对象弱引用, 异步中使用
-def GetPlayerWeakref(sOpenID):
+def GetPlayerProxy(sOpenID):
 	import script.player as player
 	who = player.GetOnlinePlayer(sOpenID)
 	if who:
-		who_ref = weakref.ref(who)
-		return who_ref
+		who_proxy = weakref.proxy(who)
+		return who_proxy
 	else:
 		return None
 
 #异步后判断弱引用的原始对象是否依然存在
-def IsRefExist(ref):
-	o = ref()
-	if o:
-		return True
-	else:
+def IsProxyExist(proxy):
+	try:
+		bool(proxy)
+	except:
 		return False
+	return True
 
 #全局函数
 #全局对象管理

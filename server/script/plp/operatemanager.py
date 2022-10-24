@@ -6,7 +6,7 @@ class CPlpOeration:
 	def __init__(self):
 		self.m_Data = GetDatCtl()
 
-	def SendPlp(self, who, dData):
+	def GeneratePlp(self, who, dData):
 		pass
 
 if "g_PlpOeration" not in globals():
