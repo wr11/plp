@@ -19,10 +19,6 @@ class CDataShadow(CMysqlBase):
 		bData = packb(data)
 		self.Handler(MYSQL_UPDATE, self.m_PrimaryData, bData, self.m_PrimaryData)
 
-	def Save():
-		#need overwrite
-		pass
-
 	def LoadDataFromDataBase(self):
 		lstData = self.Handler(MYSQL_SELECT, self.m_PrimaryData)
 		if not lstData:
@@ -33,6 +29,14 @@ class CDataShadow(CMysqlBase):
 		return data
 
 	def Load(data):
+		#need overwrite
+		pass
+
+	def Save():
+		#need overwrite
+		pass
+
+	def Update():
 		#need overwrite
 		pass
 
@@ -132,3 +136,10 @@ class CGameCtlShadow(CDataShadow):
 		for sAttr, playerdata in data:
 			setattr(self, sAttr, playerdata)
 		self.UpdateDataBase()
+
+
+# plp shadow
+class CPLPShadow(CDataShadow):
+	m_Type = "plp"
+	m_TblName = "tbl_plp"
+	m_ColName = ["plpid", "data",]
