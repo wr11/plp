@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 def Init():
-    return
+	return
 
 class CDataCtl:
 	pass

@@ -3,6 +3,7 @@
 */
 
 import {ARRAYBUFFER_UTILS, STRING_ARRAYBUFFER} from 'handlebytes.js'
+import {execServerCommand} from 'servercommand.js'
 
 let PROTOCOL_CB
 if (typeof(PROTOCOL_CB) == "undefined"){
@@ -20,6 +21,7 @@ function removeProtocolCB(iProtocol){
 
 export function netCommand(header, oNetPack){
   if (! (header in PROTOCOL_CB)){
+    execServerCommand(header, oNetPack)
     return
   }
   let cbFunc = PROTOCOL_CB[header]
@@ -111,6 +113,14 @@ export const NetPack = {
     }
   },
 
+  PacketAddBool: function PacketAddBool(bVal, oNetPack){
+    iVal = 0
+    if (bVal == true){
+      iVal = 1
+    }
+    this.PacketAddI(iVal, oNetPack)
+  },
+
   PacketAddS: function PacketAddS(str, oNetPack){
     let arraybuffer = STRING_ARRAYBUFFER.string2arraybuffer(str)
     let iStrLen = arraybuffer.byteLength
@@ -158,6 +168,15 @@ export const NetPack = {
 
   UnpackInt32: function UnpackInt32(oNetPack){
     return oNetPack.Unpack("I")
+  },
+
+  UnpackBool: function UnpackBool(oNetPack){
+    iVal = this.UnpackInt8(oNetPack)
+    bVal = false
+    if (iVal == 1){
+      bVal = true
+    }
+    return bVal
   },
 
   UnpackString: function UnpackString(oNetPack){

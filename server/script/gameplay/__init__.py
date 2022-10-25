@@ -86,6 +86,7 @@ class CGameCtl:
 		lstAttr = self.GetSaveAttrList()
 		for sAttr in lstAttr:
 			if self.GetAttrNeedSave(sAttr):
+				self.SetSaveState(sAttr, False)
 				data[sAttr] = getattr(self, sAttr, None)
 			else:
 				continue

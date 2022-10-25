@@ -10,11 +10,13 @@ import script.player as player
 @coroutine
 def Login(iConnectID, oNetPackage):
 	sOpenID = np.UnpackS(oNetPackage)
-	del oNetPackage
-	player.MakePlayer(sOpenID, iConnectID)
-	iRet = yield CheckRole(sOpenID)		#1为成功，10以上为失败码
+	iRet = player.MakePlayer(sOpenID, iConnectID)
 	if iRet > 10:
-		S2CLoginFailed(sOpenID, iRet)
+		S2CLoginFailed(iConnectID, iRet)
+		return
+	iRet = yield CheckRole(sOpenID)		#10为成功，10以上为失败码
+	if iRet > 10:
+		S2CLoginFailed(iConnectID, iRet)
 		player.RemovePlayer(sOpenID, iConnectID)
 		return
 	PrintNotify("%s login success"%sOpenID)
@@ -28,15 +30,15 @@ def CheckRole(sOpenID):
 	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadPlayerDataShadow", sOpenID)
 	iCode, data = ret
 	iCode = int(iCode)
-	if data and iCode == 1:
+	if data and iCode == 10:
 		player.GetOnlinePlayer(sOpenID).Load(data)
 		player.GetOnlinePlayer(sOpenID).m_Loaded = True
 	raise Return(iCode)
 
-def S2CLoginFailed(sOpenID, iRet):
+def S2CLoginFailed(iConnectID, iRet):
 	oNetPack = np.PacketPrepare(CS_LOGIN)
 	np.PacketAddI(iRet, oNetPack)
-	np.PacketSend(sOpenID, oNetPack)
+	np.GPSPacketSendByConnectID(iConnectID, oNetPack)
 
 def S2CLoginSuccess(sOpenID):
 	oNetPack = np.PacketPrepare(CS_LOGIN)

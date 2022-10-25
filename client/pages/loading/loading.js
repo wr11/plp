@@ -238,7 +238,7 @@ Page({
       let iNewRet = iRet - 10
       let sMsg = LOGIN_ERRCODE[iNewRet]
       wx.showToast({
-        icon: "error",
+        icon: "none",
         title: sMsg
       })
       return

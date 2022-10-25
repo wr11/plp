@@ -8,8 +8,14 @@ import script.login.login as login
 import netpackage as np
 import conf
 import script.player as player
+import script.gm as gm
 
 RPC_PROTOCOL = [SS_RPCRESPONSE, SS_RPCCALL, SS_RESPONSEERR]
+
+GPS_PROTOCOL_COMMAND = {
+	C2S_GMORDER: gm.ExecGMOrder,
+
+}
 
 def MQMessage(tData):
 	iMQProto, data = tData
@@ -79,12 +85,13 @@ def GPSNetCommand(oResPonse, iConnectID, data):
 	iDataHeader = np.UnpackInt16(oNetPackage)
 	if iDataHeader == CS_LOGIN:
 		login.Login(iConnectID, oNetPackage)
-	elif iDataHeader == C2S_GMORDER:
-		sOrder = np.UnpackS(oNetPackage)
-		PrintDebug(sOrder)
-		exec(sOrder)
-	else:
-		pass
+		return
+
+	sOpenid = player.GetOpenIDByConnectID(iConnectID)
+	global GPS_PROTOCOL_COMMAND
+	func = GPS_PROTOCOL_COMMAND.get(iDataHeader, None)
+	if func:
+		func(sOpenid, oNetPackage)
 
 def GateHandle(iConnectID, iDataHeader):
 	if not conf.IsGate():

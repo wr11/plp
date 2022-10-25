@@ -50,6 +50,7 @@ def CreatePlayerDataShadow(sOpenID):
 	return oShadow
 
 def RemovePlayerDataShadow(oResponse, sOpenID):
+	PrintDebug("RemovePlayerDataShadow", sOpenID)
 	if not GetPlayerShadowByOpenID(sOpenID):
 		return
 	del g_PlayerShadowList[sOpenID]
