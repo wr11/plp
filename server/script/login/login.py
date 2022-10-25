@@ -15,6 +15,7 @@ def Login(iConnectID, oNetPackage):
 		S2CLoginFailed(iConnectID, iRet)
 		return
 	iRet = yield CheckRole(sOpenID)		#10为成功，10以上为失败码
+	PrintDebug("CheckRole", iRet)
 	if iRet > 10:
 		S2CLoginFailed(iConnectID, iRet)
 		player.RemovePlayer(sOpenID, iConnectID)
@@ -36,11 +37,13 @@ def CheckRole(sOpenID):
 	raise Return(iCode)
 
 def S2CLoginFailed(iConnectID, iRet):
+	PrintDebug("S2CLoginFailed!!!!!!!", iRet)
 	oNetPack = np.PacketPrepare(CS_LOGIN)
 	np.PacketAddI(iRet, oNetPack)
 	np.GPSPacketSendByConnectID(iConnectID, oNetPack)
 
 def S2CLoginSuccess(sOpenID):
+	PrintDebug("S2CLoginSuccess!!!!!!!")
 	oNetPack = np.PacketPrepare(CS_LOGIN)
 	np.PacketAddI(1, oNetPack)
 	np.PacketSend(sOpenID, oNetPack)

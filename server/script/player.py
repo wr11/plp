@@ -39,6 +39,7 @@ def TrueSavePlayer(lstPlayer):
 
 @coroutine
 def SaveOnePlayer(oPlayer_proxy):
+	PrintDebug("SaveOnePlayer", oPlayer_proxy)
 	data = {}
 	playerdata = oPlayer_proxy.Save()
 	data[oPlayer_proxy.m_OpenID] = playerdata
@@ -164,4 +165,4 @@ def PlayerOffLine(response, iConnectID):
 	else:
 		PrintWarning("player%s offline save failed!!!!!"%sOpenID)
 
-		Call_out(5*60, "reoffline", PlayerOffLine, None, iConnectID)
+		Call_out(10, "reoffline", PlayerOffLine, None, iConnectID)

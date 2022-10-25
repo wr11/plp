@@ -86,7 +86,7 @@ export const NetPack = {
     if (cbFunc){
       PROTOCOL_CB[header] = cbFunc
     }
-    setTimeout(removeProtocolCB, 5000, header)
+    setTimeout(removeProtocolCB, 10000, header)
     let oNetPack = new CNetPackage(null)
     this.PacketAddI(header, oNetPack)
     return oNetPack
