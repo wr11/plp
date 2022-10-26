@@ -56,16 +56,22 @@ def OpenTips(sOpenID, iType, sDesc, *args, **kwargs):
 	"""
 	iType: 1-toast 2-modal
 	sDesc: 描述，用于回调(英文，唯一)，如果不需要回调，则可以传空字符串即可
-	如果需要回调, 则使用callback传入回调函数
+	如果需要回调, 则使用callback传入回调函数, 默认需要回调
 	"""
 	who = player.GetOnlinePlayer(sOpenID)
-	if "bNeedCallBack" in kwargs:
-		bNeedCallBack = kwargs.get("bNeedCallBack")
+	if not who:
+		return
+	if not hasattr(who, "_TipAnswer"):
+		who._TipAnswer = {}
+	dFunc = who._TipAnswer
+	if sDesc in dFunc:
+		PrintError("cannot open repeat tips %s"%sDesc)
+		return
+	bNeedCallBack = kwargs.get("bNeedCallBack", True)
 	if "callback" in kwargs and bNeedCallBack:
 		cbfunc = kwargs.pop("callback")
-		if not hasattr(who, "_TipAnswer"):
-			who._TipAnswer = {}
-		who._TipAnswer[sDesc] = cbfunc
+		if cbfunc:
+			who._TipAnswer[sDesc] = cbfunc
 	if iType == 1:
 		S2CShowToast(sOpenID, sDesc, *args, **kwargs)
 	elif iType == 2:
@@ -83,12 +89,12 @@ def TipAnswer(sOpenID, oNetPack):
 	func = dFunc.get(sDesc, None)
 	if not func:
 		return
+	del dFunc[sDesc]
+	who._TipAnswer = dFunc
 	if iType == 1:
-		del oNetPack
 		func(who)
 	elif iType == 2:
 		sContent = UnpackS(oNetPack)
 		bComfirm = UnpackBool(oNetPack)
 		bCancel = UnpackBool(oNetPack)
 		func(who, sContent, bComfirm, bCancel)
-		del oNetPack

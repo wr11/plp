@@ -69,21 +69,20 @@ def ReloadPyFile(sCurPath, sName, bReload, bNotifyNew):
 				lstPath = sPath.split("\\")
 			if sMod not in  ("__init__",):
 				lstPath.append(sMod)
-			iLen = len(lstPath)
-			for i in range(iLen):
-				lstMod.append(".".join(lstPath[i:]))
-			for sModName in lstMod:
-				try:
-					obj = import_module(sModName)
-				except:
-					continue
+			sModName = ".".join(lstPath)
+			obj = None
+			try:
+				obj = import_module(sModName)
+			except Exception as e:
+				PrintError(e, sModName)
+			if obj:
 				try:
 					oNewModule = reload(obj)
 					func = getattr(oNewModule, "OnReload", None)
 					if func:
 						func()
 				except Exception as e:
-					PrintError(e)
+					PrintError(obj, e)
 	elif "." not in sName:
 		import os
 		sCurPath = sCurPath + "\%s"%sName

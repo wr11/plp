@@ -9,11 +9,14 @@ import netpackage as np
 import conf
 import script.player as player
 import script.gm as gm
+import script.common as common
 
 RPC_PROTOCOL = [SS_RPCRESPONSE, SS_RPCCALL, SS_RESPONSEERR]
 
 GPS_PROTOCOL_COMMAND = {
 	C2S_GMORDER: gm.ExecGMOrder,
+	C2S_TOASTCB: common.TipAnswer,
+	C2S_MODALCB: common.TipAnswer,
 
 }
 
@@ -58,7 +61,6 @@ def OnNetCommand(tData):
 	iConnectID, data = tData
 	oNetPackage = np.UnpackPrepare(data)
 	iDataHeader = np.UnpackInt16(oNetPackage)
-	PrintNotify("receive header data %s" % iDataHeader)
 	if 0x100 <= iDataHeader < 0x1000:
 		#所有服务器都有可能接收到rpc协议
 		if iDataHeader in RPC_PROTOCOL:

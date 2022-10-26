@@ -6,7 +6,7 @@ from msgpack import packb, unpackb
 class CDataShadow(CMysqlBase):
 
 	def __init__(self, sPrimary):
-		super().__init__()
+		super(CDataShadow, self).__init__()
 		self.m_PrimaryData = sPrimary
 
 	def SaveToDataBase(self):
@@ -50,7 +50,6 @@ def CreatePlayerDataShadow(sOpenID):
 	return oShadow
 
 def RemovePlayerDataShadow(oResponse, sOpenID):
-	PrintDebug("RemovePlayerDataShadow", sOpenID)
 	if not GetPlayerShadowByOpenID(sOpenID):
 		return
 	del g_PlayerShadowList[sOpenID]

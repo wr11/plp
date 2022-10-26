@@ -279,32 +279,30 @@ class CRPCResponse:
 
 	def RemoteExcute(self):
 		func = GetGlobalFuncByName(self.m_CallFunc)
-		try:
+		if not self.m_CBIdx:
 			func(self, *self.m_Args, **self.m_Kwargs)
-		except Exception as e:
-			oPacket = CRPCPacket()
-			iCurServer, iCurProcessIndex = conf.GetServerNum(), conf.GetProcessIndex()
-			oPacket._PushCallPacket((iCurServer, iCurProcessIndex, self.m_CBIdx))
-			oPack = np.PacketPrepare(SS_RESPONSEERR)
-			np.PacketAddB(oPacket.m_Data, oPack)
-			np.S2SPacketSend(self.m_SourceServer[0], self.m_SourceServer[1], oPack)
-			PrintError(func, e)
+		else:
+			try:
+				func(self, *self.m_Args, **self.m_Kwargs)
+			except Exception as e:
+				oPacket = CRPCPacket()
+				iCurServer, iCurProcessIndex = conf.GetServerNum(), conf.GetProcessIndex()
+				oPacket._PushCallPacket((iCurServer, iCurProcessIndex, self.m_CBIdx))
+				oPack = np.PacketPrepare(SS_RESPONSEERR)
+				np.PacketAddB(oPacket.m_Data, oPack)
+				np.S2SPacketSend(self.m_SourceServer[0], self.m_SourceServer[1], oPack)
+				PrintError(func, e)
 
 def RemoteCallFunc(iServer, iIndex, oCallBack, sFunc, *args, **kwargs):
 	tFlag = (iServer, iIndex)
 	# PrintNotify("remote call func start ...%s %s"%(iServer, iIndex))
 	oRpc = GetRpcObject(tFlag)
-	tLink = pubdefines.CallManagerFunc("link", "GetLink", tFlag[0], tFlag[1])
 	oPacket = CRPCPacket()
 	oRpc.InitCall(oCallBack, oPacket, sFunc, *args, **kwargs)
 	oRpc.CallFunc(iServer, iIndex)
  
 def GetRpcObject(tFlag):
 	global g_RPCManager
-	tLink = pubdefines.CallManagerFunc("link", "GetLink", tFlag[0], tFlag[1])
-	if not tLink:
-		PrintWarning("RPC %s %s not connected"%tFlag)
-		return
 	if tFlag not in g_RPCManager:
 		g_RPCManager[tFlag] = CRPC()
 	return g_RPCManager[tFlag]
@@ -384,7 +382,6 @@ def _BaseBlockCall(iServer, iIndex, sTatgetFunc, args, kwargs):
 	if iTimeOut:
 		cb.SetTimeout(iTimeOut)
 	oRpc = GetRpcObject(tFlag)
-	tLink = pubdefines.CallManagerFunc("link", "GetLink", tFlag[0], tFlag[1])
 	oPacket = CRPCPacket()
 	oRpc.InitCall(cb, oPacket, sTatgetFunc, *args, **kwargs)
 	oRpc.CallFunc(iServer, iIndex)

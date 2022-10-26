@@ -12,7 +12,7 @@ if "LOCAL_THREAD" not in globals():
 if "LOCAL_FLAG" not in globals():
 	LOCAL_FLAG = ""
 
-#PrintDebug type
+#Print type
 DEBUG = 1
 WARNING = 2
 ERROR = 3

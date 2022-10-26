@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from script.gameplay import CGameCtl as CCustomGameCtl
+from script.gameplay.basectl import CGameCtl as CCustomGameCtl
 
 class CGameCtl(CCustomGameCtl):
 	def __init__(self):

@@ -74,7 +74,7 @@ class DefaultClientFactory(twisted.internet.protocol.ReconnectingClientFactory):
 	protocol = DeferClient
 
 	def __init__(self, *args):
-		super().__init__()
+		super(DefaultClientFactory, self).__init__()
 		self.m_Args = args
 
 	def buildProtocol(self, addr):

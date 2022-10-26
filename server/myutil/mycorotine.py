@@ -68,7 +68,7 @@ class Future(object):
 			try:
 				cb(self)
 			except Exception as e:
-				PrintError(e)
+				PrintError(cb, e)
 		self._callbacks = None
   
 	def set_exc_info(self, exc_info):

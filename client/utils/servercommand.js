@@ -62,10 +62,13 @@ function showModal(sDesc, sTitle, sContent, sConfirmText, sConfirmColor, bShowCa
       if (!bNeedCallBack){
         return
       }
-      sContent = res.content
-      bComfirm = res.confirm
-      bCancel = res.cancel
-      oNetPack = NetPack.PacketPrepare(PROTOCOL.C2S_MODALCB)
+      let sContent = res.content
+      if (sContent == null){
+        sContent = ""
+      }
+      let bComfirm = res.confirm
+      let bCancel = res.cancel
+      let oNetPack = NetPack.PacketPrepare(PROTOCOL.C2S_MODALCB)
       NetPack.PacketAddI(2, oNetPack)
       NetPack.PacketAddS(sDesc, oNetPack)
       NetPack.PacketAddS(sContent, oNetPack)

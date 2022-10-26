@@ -114,7 +114,7 @@ export const NetPack = {
   },
 
   PacketAddBool: function PacketAddBool(bVal, oNetPack){
-    iVal = 0
+    let iVal = 0
     if (bVal == true){
       iVal = 1
     }
@@ -171,8 +171,8 @@ export const NetPack = {
   },
 
   UnpackBool: function UnpackBool(oNetPack){
-    iVal = this.UnpackInt8(oNetPack)
-    bVal = false
+    let iVal = this.UnpackInt8(oNetPack)
+    let bVal = false
     if (iVal == 1){
       bVal = true
     }

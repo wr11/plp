@@ -27,7 +27,7 @@ def CheckDataValid(oShadow):
 	return True
 
 def UpdatePlayerShadowData(oResponse, data):
-	PrintDebug("update player shadow",data)
+	iRet = 0
 	try:
 		for sOpenID, dData in data.items():
 			if not dData:
@@ -36,9 +36,10 @@ def UpdatePlayerShadowData(oResponse, data):
 			if not oShadow:
 				oShadow = shadow.CreatePlayerDataShadow(sOpenID)
 			oShadow.Update(dData)
+		iRet = 1
 	except:
-		oResponse(0)
-	oResponse(1)
+		iRet = 0
+	oResponse(iRet)
 
 # Game Shadow
 def LoadGameShadow(oResponse, sGameName, lstAttr):
@@ -54,7 +55,6 @@ def CreateNewGameShadow(oShadow):
 	oShadow.SaveToDataBase()
 
 def UpdateGameShadowData(oResponse, data):
-	PrintDebug("update game shadow",data)
 	for sGameName, dData in data.items():
 		if not dData:
 			continue

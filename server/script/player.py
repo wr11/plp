@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from myutil.mycorotine import coroutine, Return
-from timer import Call_out
+from timer import Call_out, GetTimer, Remove_Call_out
 from gc import collect
 from pubdefines import GetPlayerProxy, IsProxyExist
 import rpc,conf
@@ -29,8 +29,11 @@ def TrueSavePlayer(lstPlayer):
 	for oPlayer in lstTemp:
 		if not oPlayer.m_Loaded:
 			continue
-		playerdata = oPlayer.Save()
-		data[oPlayer.m_OpenID] = playerdata
+		try:
+			playerdata = oPlayer.Save()
+			data[oPlayer.m_OpenID] = playerdata
+		except:
+			continue
 	iServer, iIndex = conf.GetDBS()
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdatePlayerShadowData", data)
 	if not lstPlayer:
@@ -39,13 +42,24 @@ def TrueSavePlayer(lstPlayer):
 
 @coroutine
 def SaveOnePlayer(oPlayer_proxy):
-	PrintDebug("SaveOnePlayer", oPlayer_proxy)
-	data = {}
-	playerdata = oPlayer_proxy.Save()
-	data[oPlayer_proxy.m_OpenID] = playerdata
-	iServer, iIndex = conf.GetDBS()
-	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.UpdatePlayerShadowData", data)
-	raise Return(ret)
+	if getattr(oPlayer_proxy, "m_Login", 0):
+		PrintWarning("player is in login, after 10s will offline again")
+		raise Return(0)
+	bFinish = False
+	try:
+		data = {}
+		playerdata = oPlayer_proxy.Save()
+		data[oPlayer_proxy.m_OpenID] = playerdata
+		bFinish = True
+	except Exception as e:
+		PrintError(oPlayer_proxy, e)
+		bFinish = False
+	if bFinish:
+		iServer, iIndex = conf.GetDBS()
+		ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.UpdatePlayerShadowData", data)
+		raise Return(ret)
+	else:
+		raise Return(0)
 
 class CPlayer:
 	def __init__(self, sOpenID, iConnectID):
@@ -60,6 +74,9 @@ class CPlayer:
 		#需要存盘的数据
 		self.m_SendedNum = 0
 		self.m_SendedList = []
+
+	def __repr__(self):
+		return "<player(%s) %s %s>" % (self.m_ConnectID, self.m_OpenID, str(self.m_SaveState))
 
 	def GetConnectID(self):
 		return self.m_ConnectID
@@ -105,7 +122,6 @@ def MakePlayer(sOpenID, iConnectID):
 
 def AddPlayer(sOpenID, iConnectID, oPlayer):
 	global PLAYER_LIST, CONNECTID2OPENID
-	PrintDebug("-------playerlistklogin", PLAYER_LIST)
 	if sOpenID in PLAYER_LIST and iConnectID not in CONNECTID2OPENID:
 		who = PLAYER_LIST[sOpenID]
 		if getattr(who, "m_OffLine", 0):
@@ -147,17 +163,14 @@ def GetOpenIDByConnectID(iConnectID):
 def PlayerOffLine(response, iConnectID):
 	sOpenID = GetOpenIDByConnectID(iConnectID)
 	who_proxy = GetPlayerProxy(sOpenID)
-	PrintDebug("=========playerlistoffline",PLAYER_LIST)
 	if not who_proxy:
 		PrintWarning("%s player object has already unloaded"%sOpenID)
 		return
-	PrintDebug(who_proxy)
 	if getattr(who_proxy, "m_OffLine", 0):
 		PrintWarning("%s player is in offline"%sOpenID)
 		return
 	who_proxy.m_OffLine = 1
 	ret = yield SaveOnePlayer(who_proxy)
-	PrintDebug("------SaveOnePlayerret", ret)
 	if ret:
 		iServer, iIndex = conf.GetDBS()
 		rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.datashadow.RemovePlayerDataShadow", sOpenID)

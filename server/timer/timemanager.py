@@ -5,7 +5,7 @@ import pubtool
 import pubdefines
 import pubtool
 
-class CTimerManager(pubtool.Singleton):
+class CTimerManager:
 	def __init__(self):
 		self.m_Map = {}
 

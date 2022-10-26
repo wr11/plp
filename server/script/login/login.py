@@ -2,7 +2,7 @@
 
 from protocol import CS_LOGIN
 from myutil.mycorotine import coroutine, Return
-from pubdefines import GetPlayerProxy
+from pubdefines import GetPlayerProxy, IsProxyExist
 
 import netpackage as np
 import script.player as player
@@ -14,13 +14,18 @@ def Login(iConnectID, oNetPackage):
 	if iRet > 10:
 		S2CLoginFailed(iConnectID, iRet)
 		return
+	oPlayer_proxy = GetPlayerProxy(sOpenID)
+	oPlayer_proxy.m_Login = 1
 	iRet = yield CheckRole(sOpenID)		#10为成功，10以上为失败码
-	PrintDebug("CheckRole", iRet)
 	if iRet > 10:
 		S2CLoginFailed(iConnectID, iRet)
+		if IsProxyExist(oPlayer_proxy):
+			oPlayer_proxy.m_Login = 0
 		player.RemovePlayer(sOpenID, iConnectID)
 		return
 	PrintNotify("%s login success"%sOpenID)
+	if IsProxyExist(oPlayer_proxy):
+		oPlayer_proxy.m_Login = 0
 	S2CLoginSuccess(sOpenID)
 
 @coroutine
@@ -37,13 +42,11 @@ def CheckRole(sOpenID):
 	raise Return(iCode)
 
 def S2CLoginFailed(iConnectID, iRet):
-	PrintDebug("S2CLoginFailed!!!!!!!", iRet)
 	oNetPack = np.PacketPrepare(CS_LOGIN)
 	np.PacketAddI(iRet, oNetPack)
 	np.GPSPacketSendByConnectID(iConnectID, oNetPack)
 
 def S2CLoginSuccess(sOpenID):
-	PrintDebug("S2CLoginSuccess!!!!!!!")
 	oNetPack = np.PacketPrepare(CS_LOGIN)
 	np.PacketAddI(1, oNetPack)
 	np.PacketSend(sOpenID, oNetPack)
