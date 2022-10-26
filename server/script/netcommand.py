@@ -90,10 +90,14 @@ def GPSNetCommand(oResPonse, iConnectID, data):
 		return
 
 	sOpenid = player.GetOpenIDByConnectID(iConnectID)
+	who = player.GetOnlinePlayer(sOpenid)
+	if not who or getattr(who, "m_OffLine", 0):
+		PrintWarning("%s is in offline but receive protocol"%who)
+		return
 	global GPS_PROTOCOL_COMMAND
 	func = GPS_PROTOCOL_COMMAND.get(iDataHeader, None)
 	if func:
-		func(sOpenid, oNetPackage)
+		func(who, oNetPackage)
 
 def GateHandle(iConnectID, iDataHeader):
 	if not conf.IsGate():

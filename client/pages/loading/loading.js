@@ -257,6 +257,13 @@ Page({
       icon: "success",
       title: '加载完成',
     })
+    //setTimeout(this.GotoGame, 200)
+  },
+
+  GotoGame(){
+    wx.navigateTo({
+      url: '../gm/gm',
+    })
   },
 
   openGM(){

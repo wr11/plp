@@ -1,3 +1,5 @@
+//用于处理单独由服务器发起协议（客户端发起但需要服务器回调的协议不算）
+
 import {PROTOCOL} from 'protocol.js'
 import {NetPack} from 'netpackage.js'
 

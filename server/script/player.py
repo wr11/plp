@@ -90,14 +90,6 @@ class CPlayer:
 	def GetSaveAttrList(self):
 		return self.m_SaveState.keys()
 
-	def IncreaseSend(self, iNum, sID):
-		self.m_SendedNum += iNum
-		if sID in self.m_SendedList:
-			self.m_SendedList.append(sID)
-		self.SetSaveState("m_SendedNum", True)
-		self.SetSaveState("m_SendedList", True)
-
-
 	def Save(self):
 		data = {}
 		lstAttr = self.GetSaveAttrList()
@@ -114,6 +106,17 @@ class CPlayer:
 			return
 		for sAttr, val in data.items():
 			setattr(self, sAttr, val)
+
+	def AddhPlp(self, iNum, sID):
+		self.m_SendedNum += iNum
+		if sID not in self.m_SendedList:
+			PrintWarning("%s plpid repeated"%self.m_OpenID)
+			self.m_SendedList.append(sID)
+		self.SetSaveState("m_SendedNum", True)
+		self.SetSaveState("m_SendedList", True)
+
+	def CheckPulishCnt(self, iNum):
+		return True
 
 def MakePlayer(sOpenID, iConnectID):
 	oPlayer = CPlayer(sOpenID, iConnectID)

@@ -4,7 +4,8 @@ def Init():
 	return
 
 class CDataCtl:
-	pass
+	def __init__(self):
+		self.m_Container = []
 
 if "g_PlpDataCtl" not in globals():
 	g_PlpDataCtl = CDataCtl()

@@ -77,12 +77,9 @@ def OpenTips(sOpenID, iType, sDesc, *args, **kwargs):
 	elif iType == 2:
 		S2CShowModal(sOpenID, sDesc, *args, **kwargs)
 
-def TipAnswer(sOpenID, oNetPack):
+def TipAnswer(who, oNetPack):
 	iType = UnpackInt8(oNetPack)
 	sDesc = UnpackS(oNetPack)
-	who = player.GetOnlinePlayer(sOpenID)
-	if not who:
-		return
 	dFunc = getattr(who, "_TipAnswer", {})
 	if not dFunc:
 		return
