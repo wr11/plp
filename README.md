@@ -6,7 +6,7 @@ server:
 python 3.11.0
 pip install colorama
 pip install msgpack
-pip install twisted
+pip install twisted --use-pep517
 pip install pymysql
 
 client:
