@@ -14,7 +14,7 @@ def Login(iConnectID, oNetPackage):
 	if iRet > 10:
 		S2CLoginFailed(iConnectID, iRet)
 		return
-	oPlayer_proxy = GetPlayerProxy(sOpenID)
+	oPlayer_proxy = GetPlayerProxy(sOpenID, False)
 	oPlayer_proxy.m_Login = 1
 	iRet = yield CheckRole(sOpenID)		#10为成功，10以上为失败码
 	if iRet > 10:
@@ -37,8 +37,8 @@ def CheckRole(sOpenID):
 	iCode, data = ret
 	iCode = int(iCode)
 	if data and iCode == 10:
-		player.GetOnlinePlayer(sOpenID).Load(data)
-		player.GetOnlinePlayer(sOpenID).m_Loaded = True
+		player.GetPlayer(sOpenID).Load(data)
+		player.GetPlayer(sOpenID).m_Loaded = True
 	raise Return(iCode)
 
 def S2CLoginFailed(iConnectID, iRet):

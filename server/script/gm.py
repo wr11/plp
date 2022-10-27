@@ -30,4 +30,4 @@ def GetAnswer(sOrder, who, *args):
 	bConfirm = args[1]
 	bCancel = args[2]
 	if bConfirm:
-		TrueExecGMOrder(who.m_OpenID, sOrder)
+		TrueExecGMOrder(who, sOrder)

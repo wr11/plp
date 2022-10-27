@@ -28,9 +28,12 @@ APPID = "wx4df313f347893eb8"
 SECRETKEY = "f7fef44a65e0678d1302ecf86f3f5925"
 
 #玩家对象弱引用, 异步中使用
-def GetPlayerProxy(sOpenID):
+def GetPlayerProxy(sOpenID, bOnline = True):
 	import script.player as player
-	who = player.GetOnlinePlayer(sOpenID)
+	if bOnline:
+		who = player.GetOnlinePlayer(sOpenID)
+	else:
+		who = player.GetPlayer(sOpenID)
 	if who:
 		who_proxy = weakref.proxy(who)
 		return who_proxy

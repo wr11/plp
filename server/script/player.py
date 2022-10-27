@@ -158,6 +158,11 @@ def GetOnlinePlayer(sOpenID):
 		return oPlayer
 	return None
 
+def GetPlayer(sOpenID):
+	global PLAYER_LIST
+	oPlayer =  PLAYER_LIST.get(sOpenID, None)
+	return oPlayer
+
 def GetOnlinePlayerNum():
 	global PLAYER_LIST
 	return len(PLAYER_LIST)
