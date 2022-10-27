@@ -47,12 +47,11 @@ class CMysqlBase:
 	m_ColName 必有data列，以及ID列（用于唯一主键，字符串类型，不用int），且顺序为[id, data]
 	"""
 
-	m_Type = ""		#子类需对该属性重新赋值
-	m_TblName = ""
-	m_ColName = ["id", "data"]
-
-	def __init__(self):
+	def __init__(self, sType, sTblName, lstColName = ["id", "data"]):
 		self.m_Conn = GetMysqlConnect()
+		self.m_Type = sType		#子类需对该属性重新赋值
+		self.m_TblName = sTblName
+		self.m_ColName = lstColName
 
 	def __repr__(self):
 		cls = self.__class__

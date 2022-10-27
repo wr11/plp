@@ -56,7 +56,7 @@ def OpenTips(sOpenID, iType, sDesc, *args, **kwargs):
 	"""
 	iType: 1-toast 2-modal
 	sDesc: 描述，用于回调(英文，唯一)，如果不需要回调，则可以传空字符串即可
-	如果需要回调, 则使用callback传入回调函数, 默认需要回调
+	如果需要回调, 则使用callback传入回调函数, iType为2时默认需要回调，为1时默认不需要回调
 	"""
 	who = player.GetOnlinePlayer(sOpenID)
 	if not who:

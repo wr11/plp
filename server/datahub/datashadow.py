@@ -1,12 +1,77 @@
 # coding:utf-8
 
-from datahub.mysql.mysqlbase import CMysqlBase, MYSQL_INSERT, MYSQL_UPDATE, MYSQL_SELECT
+from datahub.mysql.mysqlbase import CMysqlBase, MYSQL_INSERT, MYSQL_UPDATE, MYSQL_SELECT, MYSQL_MANUAL
 from msgpack import packb, unpackb
 
-class CDataShadow(CMysqlBase):
+class CDataTableShadow(CMysqlBase):
+	"""
+	代表 mysql中的一个表，一次存取多条记录的数据
+	"""
 
-	def __init__(self, sPrimary):
-		super(CDataShadow, self).__init__()
+	def __init__(self, sType, sTblName, lstColName):
+		super(CDataTableShadow, self).__init__(sType, sTblName, lstColName)
+		self.m_ListData = []
+
+	def SetData(self, lstData):
+		self.m_ListData = lstData
+
+	def SaveToDataBase(self):
+		lstArgs = []
+		lstStrVal = []
+		for dSaveData in self.m_ListData:
+			dData = self.RepairData(dSaveData)
+			primarydata = self.GetPrimaryData(dData)
+			if not self.CheckPrimaryData(primarydata):
+				PrintWarning("%s %s primarydata: %s is not illegal"%(self.m_Type, self.m_TblName, primarydata))
+				continue
+			lstArgs.append(primarydata)
+			lstArgs.append(packb(dData))
+			lstStrVal.append("(%s,%s)")
+		sStrVal = ",".join(lstStrVal)
+		sSqlStatement = "INSERT INTO %s VALUES %s"%(self.m_TblName, sStrVal)
+		try:
+			self.Handler(MYSQL_MANUAL, *lstArgs, Statement = sSqlStatement)
+		except Exception as e:
+			PrintWarning("ListData save failed!")
+			PrintError(e)
+			return
+
+		self.m_ListData = []
+
+	def RepairData(dData):
+		#有需要时重写，可以用来线上修正数据
+		return dData
+
+	def CheckPrimaryData(self, primarydata):
+		iCheck = 0
+		sCheck = ""
+		if type(iCheck) == type(primarydata):
+			if primarydata > iCheck:
+				return True
+		elif type(sCheck) == type(primarydata):
+			if primarydata != sCheck:
+				return True
+		else:
+			return False
+		return False
+
+	def GetPrimaryData(self, dData):
+		#获取主键("id")的值, 只可以为大于零整数，或者不为空的字符串, 不可与现有表中存在的主键值重复
+		#need overwrite
+		pass
+
+	def LookUp(self, sSelectType):
+		sStatement = "SELECT %s FROM %s"%(sSelectType ,self.m_TblName)
+		ret = self.Handler(MYSQL_MANUAL, Statement = sStatement)
+		return ret
+
+class CDataShadow(CMysqlBase):
+	"""
+	代表 mysql表中的某一个记录，一次只存取该条记录的数据
+	"""
+
+	def __init__(self, sType, sTblName, lstColName, sPrimary):
+		super(CDataShadow, self).__init__(sType, sTblName, lstColName)
 		self.m_PrimaryData = sPrimary
 
 	def SaveToDataBase(self):
@@ -58,12 +123,9 @@ def GetPlayerShadowByOpenID(sOpenID):
 	return g_PlayerShadowList.get(sOpenID, None)
 
 class CPlayerDataShadow(CDataShadow):
-	m_Type = "player"
-	m_TblName = "tbl_player"
-	m_ColName = ["openid", "data",]
 
 	def __init__(self, sOpenID):
-		super(CPlayerDataShadow, self).__init__(sOpenID)
+		super(CPlayerDataShadow, self).__init__("player", "tbl_player", ["openid", "data",], sOpenID)
 		self.m_OpenID = sOpenID
 		self.m_SendedNum = 0
 		self.m_SendedList = []
@@ -111,7 +173,7 @@ class CGameCtlShadow(CDataShadow):
 	m_ColName = ["game_name", "data",]
 
 	def __init__(self, sGameName):
-		super(CGameCtlShadow, self).__init__(sGameName)
+		super(CGameCtlShadow, self).__init__("game", "tbl_game", ["game_name", "data",], sGameName)
 		self.m_GameName = sGameName
 
 	def Setattr(self, lstAttr):
@@ -138,8 +200,31 @@ class CGameCtlShadow(CDataShadow):
 		self.UpdateDataBase()
 
 
-# plp shadow
-class CPLPShadow(CDataShadow):
-	m_Type = "plp"
-	m_TblName = "tbl_plp"
-	m_ColName = ["plpid", "data",]
+# listContainer shadow
+
+if "g_ListContainerShadow" not in globals():
+	g_ListContainerShadow = {}
+
+def CreateListContainerShadow(sType):
+	sTblName = sType
+	o = GetListContainerShadowByType(sType)
+	if o:
+		return o
+	oShadow = CListContainerShadow(sType, sTblName, ["plpid", "data",])
+	g_ListContainerShadow[sType] = oShadow
+	return oShadow
+
+def GetListContainerShadowByType(sType):
+	global g_ListContainerShadow
+	return g_ListContainerShadow.get(sType, None)
+
+def RemoveListContainer(sType):
+	global g_ListContainerShadow
+	if sType not in g_ListContainerShadow:
+		return
+	del g_ListContainerShadow[sType]
+
+class CListContainerShadow(CDataTableShadow):
+
+	def GetPrimaryData(self, dData):
+		return dData["id"]

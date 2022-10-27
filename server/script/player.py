@@ -38,7 +38,7 @@ def TrueSavePlayer(lstPlayer):
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdatePlayerShadowData", data)
 	if not lstPlayer:
 		return
-	Call_out(2, "truesaveplayer", TrueSavePlayer, lstPlayer)
+	Call_out(5, "truesaveplayer", TrueSavePlayer, lstPlayer)
 
 @coroutine
 def SaveOnePlayer(oPlayer_proxy):
@@ -69,11 +69,13 @@ class CPlayer:
 		self.m_SaveState = {
 			"m_SendedNum": False,
 			"m_SendedList": False,
+			"m_GetPlpWay": False,
 		}
 
 		#需要存盘的数据
 		self.m_SendedNum = 0
 		self.m_SendedList = []
+		self.m_GetPlpWay = 1		#1-不获取重复的 2-获取重复的
 
 	def __repr__(self):
 		return "<player(%s) %s %s>" % (self.m_ConnectID, self.m_OpenID, str(self.m_SaveState))
@@ -118,6 +120,13 @@ class CPlayer:
 	def CheckPulishCnt(self, iNum):
 		return True
 
+	def GetPlpWay(self):
+		return self.m_GetPlpWay
+
+	def SetPlpWay(self, iWay):
+		self.SetSaveState("m_GetPlpWay", True)
+		self.m_GetPlpWay = iWay
+
 def MakePlayer(sOpenID, iConnectID):
 	oPlayer = CPlayer(sOpenID, iConnectID)
 	bRet = AddPlayer(sOpenID, iConnectID, oPlayer)
@@ -144,7 +153,10 @@ def RemovePlayer(sOpenID, iConnectID):
 
 def GetOnlinePlayer(sOpenID):
 	global PLAYER_LIST
-	return PLAYER_LIST.get(sOpenID, None)
+	oPlayer =  PLAYER_LIST.get(sOpenID, None)
+	if oPlayer and oPlayer.m_Loaded:
+		return oPlayer
+	return None
 
 def GetOnlinePlayerNum():
 	global PLAYER_LIST

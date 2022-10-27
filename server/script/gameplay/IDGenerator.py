@@ -18,10 +18,16 @@ class CGameCtl(CCustomGameCtl):
 		iNum = self.m_IDList[sType]
 		iNewID = iNum + 1
 		self.m_IDList[sType] = iNewID
-		return str(iNewID)
+		return iNewID
 
-	def GetCurICByType(self, sType):
-		return str(self.m_IDList.get(sType, 0))
+	def FixIDByType(self, sType, iVal):
+		self.SetSaveState("m_IDList", True)
+		if sType not in self.m_IDList:
+			self.m_IDList[sType] = 0
+		self.m_IDList[sType] = iVal
+
+	def GetCurIDByType(self, sType):
+		return self.m_IDList.get(sType, 0)
 
 	def ResetIDByType(self, sType):
 		if sType not in self.m_IDList:

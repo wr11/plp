@@ -62,3 +62,19 @@ def UpdateGameShadowData(oResponse, data):
 		if not oShadow:
 			oShadow = shadow.CreateGameShadow(sGameName)
 		oShadow.Update(dData)
+
+#listcontainer shadow
+def ListContainerSaveToDBS(oResponse, data):
+	for sType, lstData in data:
+		oShadow = shadow.GetListContainerShadowByType(sType)
+		if not oShadow:
+			oShadow = shadow.CreateListContainerShadow(sType)
+		oShadow.SetData(lstData)
+		oShadow.SaveToDataBase()
+
+def LoadDataFromTableShadow(oResponse, sType, sSelectType):
+	oShadow = shadow.GetListContainerShadowByType(sType)
+	if not oShadow:
+		oShadow = shadow.CreateListContainerShadow(sType)
+	data = oShadow.LookUp(sSelectType)
+	oResponse(data)

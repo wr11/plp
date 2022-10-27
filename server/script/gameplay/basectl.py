@@ -47,6 +47,7 @@ def Init():
 		if not lstData[iIndex]:
 			continue
 		oGameCtl.Load(lstData[iIndex])
+		oGameCtl.m_Loaded = True
 
 	Call_out(5*60, "savegame", SaveGames)
 
@@ -55,6 +56,8 @@ def SaveGames():
 	global g_GameList
 	data = {}
 	for sGameName, oGameCtl in g_GameList.items():
+		if not oGameCtl.m_Loaded:
+			continue
 		dGameData = oGameCtl.Save()
 		if not dGameData:
 			continue
