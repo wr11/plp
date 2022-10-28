@@ -128,6 +128,14 @@ Page({
       })
       return
     }
+    let iServerState = NetPack.UnpackInt8(oNetPack)
+    if (iServerState == 0){
+      wx.showToast({
+        icon: "error",
+        title: '服务器维护',
+      })
+      return
+    }
     this.updateProgress(25)
     this.checkNeedLoginWX()
   },

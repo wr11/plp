@@ -20,6 +20,9 @@ GPS_PROTOCOL_COMMAND = {
 
 }
 
+if "g_ServerState" not in globals():
+	g_ServerState = 0		#0-不允许登录, 1-允许登录
+
 def MQMessage(tData):
 	iMQProto, data = tData
 	if iMQProto < 0x100:
@@ -36,6 +39,7 @@ def OnOtherMessage(data):
 	pass
 
 def ParseMQMessage(iMQHeader, data):
+	global g_ServerState
 	if iMQHeader == MQ_LOCALMAKEROUTE:
 		sHost, iPort, iServer, iIndex = data
 		CallManagerFunc("link", "AddLink", sHost, iPort, iServer, iIndex)
@@ -52,12 +56,14 @@ def ParseMQMessage(iMQHeader, data):
 		import conf
 		iConnectID = data[0]
 		CallManagerFunc("link", "DelClientLink", iConnectID)
-		iServer, iIndex = conf.GetGPS()
-		rpc.RemoteCallFunc(iServer, iIndex, None, "script.player.PlayerOffLine", iConnectID)
+		if g_ServerState:
+			iServer, iIndex = conf.GetGPS()
+			rpc.RemoteCallFunc(iServer, iIndex, None, "script.player.PlayerOffLine", iConnectID)
 	elif iMQHeader == MQ_DATARECEIVED:
 		OnNetCommand(data)
 
 def OnNetCommand(tData):
+	global g_ServerState
 	iConnectID, data = tData
 	oNetPackage = np.UnpackPrepare(data)
 	iDataHeader = np.UnpackInt16(oNetPackage)
@@ -69,6 +75,8 @@ def OnNetCommand(tData):
 			rpc.Receive(iDataHeader, data)
 	elif iDataHeader >= 0x1000:
 		#客户端协议只会在GATE接收
+		if not g_ServerState and iDataHeader != CS_HELLO:
+			return
 		if iDataHeader not in REGIST:
 			PrintWarning("protocol %s not registed"%iDataHeader)
 			return
@@ -115,7 +123,9 @@ def GateHandle(iConnectID, iDataHeader):
 	return 1
 
 def SendHello(iConnectID):
+	global g_ServerState
 	oNetPack = np.PacketPrepare(CS_HELLO)
+	np.PacketAddI(g_ServerState, oNetPack)
 	np.PacketSend(iConnectID, oNetPack)
 
 def SendAppKey(iConnectID):
@@ -123,3 +133,7 @@ def SendAppKey(iConnectID):
 	np.PacketAddS(APPID, oNetPack)
 	np.PacketAddS(SECRETKEY, oNetPack)
 	np.PacketSend(iConnectID, oNetPack)
+
+def SetServerState(oResponse, iState):
+	global g_ServerState
+	g_ServerState = iState

@@ -8,6 +8,12 @@ from script.gameplay.basectl import GetGameCtl
 from myutil.myrandom import GetUniqueRandomIDList
 
 import script.player as player
+import pubdefines
+
+def Init():
+	oPlpManager = GetOperationManager()
+	if not pubdefines.GetGlobalManager("plp"):
+		pubdefines.SetGlobalManager("plp", oPlpManager)
 
 class CPlp:
 	def Load(self, dData):
@@ -31,7 +37,7 @@ class CPlpOeration:
 		dData["id"] = iID
 		oPlp = CPlp()
 		oPlp.Load(dData)
-		self.m_DataCtl.append(oPlp)
+		self.m_DataCtl.Append(iID, oPlp)
 
 	def ValidPublishPlp(self, who, dData):
 		if not who.CheckPulishCnt(PUBLISHCNT_DAY):
@@ -70,7 +76,8 @@ class CPlpOeration:
 		iMaxID = oGameCtl.GetCurIDByType(IDTYPE)
 		iMinID = yield self.m_DataCtl.GetMinID()
 		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, 5)
-		lstPlpData = yield self.GetMultiPlpData()
+		lstPlpData = yield self.m_DataCtl.GetMultiPlpData(lstPlpID)
+		print(lstPlpData)
 
 	def GetPlpIDList(self, iWay, lstSended, iMaxID, iMinID, iCount):
 		#待优化，iCount很多时会占很大内存

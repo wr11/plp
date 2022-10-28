@@ -73,8 +73,9 @@ class CMysqlBase:
 			return "INSERT INTO %s VALUES (%s);" % (self.m_TblName, sAll)
 		elif iType == MYSQL_UPDATE:		#更新语句
 			lstUpdateName = []
-			for sName in self.m_ColName:
-				lstUpdateName.append("%s=%s"%(sName))
+			lstColUpdate = self.m_ColName[1:]
+			for sName in lstColUpdate:
+				lstUpdateName.append("%s=%s"%(sName, "%s"))
 			sUpdate = ",".join(lstUpdateName)
 			return "UPDATE %s SET %s WHERE %s=%s;" % (self.m_TblName, sUpdate, self.GetPrimaryKey(), "%s")
 
@@ -98,7 +99,10 @@ class CMysqlBase:
 			else:
 				sSqlState = self.GenerateSqlStatement(iType)
 			# PrintDebug(sSqlState)
-			oCursor.execute(sSqlState, args)
+			if not args:
+				oCursor.execute(sSqlState)
+			else:
+				oCursor.execute(sSqlState, args)
 			result = oCursor.fetchall()
 		self.m_Conn.commit()
 		PrintDebug("mysql handler",iType, result)

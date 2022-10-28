@@ -3,6 +3,8 @@
 from datahub.mysql.mysqlbase import CMysqlBase, MYSQL_INSERT, MYSQL_UPDATE, MYSQL_SELECT, MYSQL_MANUAL
 from msgpack import packb, unpackb
 
+from mylog.logcmd import PrintDebug
+
 class CDataTableShadow(CMysqlBase):
 	"""
 	代表 mysql中的一个表，一次存取多条记录的数据
@@ -60,9 +62,13 @@ class CDataTableShadow(CMysqlBase):
 		#need overwrite
 		pass
 
-	def LookUp(self, sSelectType):
-		sStatement = "SELECT %s FROM %s"%(sSelectType ,self.m_TblName)
-		ret = self.Handler(MYSQL_MANUAL, Statement = sStatement)
+	def LookUp(self, sSelectType, filter = None):
+		if not filter:
+			sStatement = "SELECT %s FROM %s"%(sSelectType ,self.m_TblName)
+			ret = self.Handler(MYSQL_MANUAL, Statement = sStatement)
+		else:
+			sStatement = "SELECT %s FROM %s WHERE %s IN %s"%(sSelectType ,self.m_TblName, self.m_ColName[0])
+			ret = self.Handler(MYSQL_MANUAL, filter, Statement = sStatement)
 		return ret
 
 class CDataShadow(CMysqlBase):
@@ -82,7 +88,8 @@ class CDataShadow(CMysqlBase):
 	def UpdateDataBase(self):
 		data = self.Save()
 		bData = packb(data)
-		self.Handler(MYSQL_UPDATE, self.m_PrimaryData, bData, self.m_PrimaryData)
+		PrintDebug("UpdateDataBase",data)
+		self.Handler(MYSQL_UPDATE, bData, self.m_PrimaryData)
 
 	def LoadDataFromDataBase(self):
 		lstData = self.Handler(MYSQL_SELECT, self.m_PrimaryData)
@@ -128,22 +135,30 @@ class CPlayerDataShadow(CDataShadow):
 		super(CPlayerDataShadow, self).__init__("player", "tbl_player", ["openid", "data",], sOpenID)
 		self.m_OpenID = sOpenID
 		self.m_SendedNum = 0
+		self.m_SendedAllNum = 0
 		self.m_SendedList = []
+		self.m_GetPlpWay = 1
 
 	def Save(self):
 		data = {}
-		data["SendNum"] = self.m_SendedNum
-		data["SendedList"] = self.m_SendedList
+		data["m_SendedNum"] = self.m_SendedNum
+		data["m_SendedList"] = self.m_SendedList
+		data["m_SendedAllNum"] = self.m_SendedAllNum
+		data["m_GetPlpWay"] = self.m_GetPlpWay
 		return data
 
 	def Load(self, data):
 		if not data:
 			return
-		self.m_SendedNum = data["SendNum"]
-		self.m_SendedList = data["SendedList"]
+		self.m_SendedNum = data.get("m_SendedNum", 0)
+		self.m_SendedList = data.get("m_SendedList", [])
+		self.m_SendedAllNum = data.get("m_SendedAllNum", 0)
+		self.m_GetPlpWay = data.get("m_GetPlpWay", 0)
 
 	def Update(self, data):
-		for sAttr, playerdata in data:
+		if not data:
+			return
+		for sAttr, playerdata in data.items():
 			setattr(self, sAttr, playerdata)
 		self.UpdateDataBase()
 
@@ -195,7 +210,9 @@ class CGameCtlShadow(CDataShadow):
 			setattr(self, sAttr, val)
 
 	def Update(self, data):
-		for sAttr, playerdata in data:
+		if not data:
+			return
+		for sAttr, playerdata in data.items():
 			setattr(self, sAttr, playerdata)
 		self.UpdateDataBase()
 

@@ -14,7 +14,10 @@ def TrueExecGMOrder(who, sOrder):
 	bSuccess = True
 	try:
 		PrintDebug("excuting GM order: ", sOrder)
-		exec(sOrder)
+		if sOrder in ORDER:
+			ORDER[sOrder](who)
+		else:
+			exec(sOrder)
 	except Exception as e:
 		PrintError(e)
 		bSuccess = False
@@ -31,3 +34,19 @@ def GetAnswer(sOrder, who, *args):
 	bCancel = args[2]
 	if bConfirm:
 		TrueExecGMOrder(who, sOrder)
+
+
+
+def LookGameCtl(who):
+	import script.player as player
+	import pubdefines
+	# import script.gameplay.basectl as gameplay
+	# iID = gameplay.GetGameCtl("IDGenerator").GenerateIDByType("test")
+	# PrintDebug(iID)
+	# who.AddPlp(78)
+	who.RemovePlp(78)
+	print(who.m_SendedNum, who.m_SendedList, who.m_SendedAllNum)
+
+ORDER = {
+	"LookGameCtl": LookGameCtl,
+}

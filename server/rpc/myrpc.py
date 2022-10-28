@@ -265,7 +265,6 @@ class CRPCResponse:
 
 	def __call__(self, *args, **kwargs):
 		if not self.m_CBIdx:		#不需要回调
-			PrintWarning("do not need callback", self.__repr__())
 			return
 		if self.m_Called:		#不可重复回调
 			return

@@ -30,6 +30,7 @@ def UpdatePlayerShadowData(oResponse, data):
 	iRet = 0
 	try:
 		for sOpenID, dData in data.items():
+			PrintDebug("UpdatePlayerShadowData", sOpenID, dData)
 			if not dData:
 				continue
 			oShadow = shadow.GetPlayerShadowByOpenID(sOpenID)
@@ -37,7 +38,8 @@ def UpdatePlayerShadowData(oResponse, data):
 				oShadow = shadow.CreatePlayerDataShadow(sOpenID)
 			oShadow.Update(dData)
 		iRet = 1
-	except:
+	except Exception as e:
+		PrintError(e)
 		iRet = 0
 	oResponse(iRet)
 
@@ -77,4 +79,11 @@ def LoadDataFromTableShadow(oResponse, sType, sSelectType):
 	if not oShadow:
 		oShadow = shadow.CreateListContainerShadow(sType)
 	data = oShadow.LookUp(sSelectType)
+	oResponse(data)
+
+def LoadMultiDataFromTableShadow(oResponse, sType, sSelectType, lstPrimaryData):
+	oShadow = shadow.GetListContainerShadowByType(sType)
+	if not oShadow:
+		oShadow = shadow.CreateListContainerShadow(sType)
+	data = oShadow.LookUp(sSelectType, filter = lstPrimaryData)
 	oResponse(data)

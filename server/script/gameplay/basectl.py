@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from mylog.logcmd import PrintDebug
 from timer import Call_out
 from myutil.mycorotine import coroutine, WaitMultiFuture
 
@@ -18,7 +19,7 @@ def InitGameList():
 
 	import script.gameplay.IDGenerator as IDGenerator
 
-	g_GameList["IDGenerator"] = IDGenerator.CGameCtl
+	g_GameList["IDGenerator"] = IDGenerator.CGameCtl()
 
 @coroutine
 def Init():
@@ -27,18 +28,19 @@ def Init():
 	lstFuture = []
 	lstName =[]
 	for sGameName, oGamectl in g_GameList.items():
-		if oGamectl.m_Loaded:
+		oGamectl.Init()
+		if getattr(oGamectl, "m_Loaded", 0):
 			continue
 		if sGameName in lstName:
 			PrintWarning("Game Name %s Repeated!!"%sGameName)
 			continue
 		lstName.append(sGameName)
-		lstAttr = oGamectl.GetSaveAttrList()
+		lstAttr = oGamectl.GetSaveAttrList(bList = True)
 		if not lstAttr:
 			continue
 		iServer, iIndex = conf.GetDBS()
 		oFuture = rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadGameShadow", sGameName, lstAttr)
-		lstFuture = oFuture
+		lstFuture.append(oFuture)
 	lstData = yield WaitMultiFuture(lstFuture)
 	for iIndex, sGameName in enumerate(lstName):
 		oGameCtl = GetGameCtl(sGameName)
@@ -48,15 +50,16 @@ def Init():
 			continue
 		oGameCtl.Load(lstData[iIndex])
 		oGameCtl.m_Loaded = True
+		oGamectl.AfterLoad()
 
-	Call_out(5*60, "savegame", SaveGames)
+	Call_out(5, "savegame", SaveGames)
 
 def SaveGames():
 	# 先不做分帧处理，后面活动多了再做
 	global g_GameList
 	data = {}
 	for sGameName, oGameCtl in g_GameList.items():
-		if not oGameCtl.m_Loaded:
+		if not getattr(oGameCtl, "m_Loaded", 0):
 			continue
 		dGameData = oGameCtl.Save()
 		if not dGameData:
@@ -80,10 +83,16 @@ class CGameCtl:
 	def GetAttrNeedSave(self, sAttr):
 		return self.m_SaveAttr[sAttr]
 
-	def GetSaveAttrList(self):
-		return self.m_SaveAttr.keys()
+	def GetSaveAttrList(self, bList = False):
+		if not bList:
+			return self.m_SaveAttr.keys()
+		else:
+			return list(self.m_SaveAttr.keys())
 
 	def Init(self):
+		pass
+
+	def AfterLoad(self):
 		pass
 
 	def Save(self):

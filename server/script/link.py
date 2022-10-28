@@ -28,6 +28,9 @@ class CLinkManager:
 		tFlag = (iServer, iIndex)
 		return self.m_LinkDict.get(tFlag, ())
 
+	def Links(self):
+		return self.m_LinkDict.keys()
+
 	def AddClientLink(self, sIP, iPort, iConnectID):
 		if iConnectID not in self.m_ClientLink:
 			self.m_ClientLink[iConnectID] = (sIP, iPort)

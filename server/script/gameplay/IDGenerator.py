@@ -6,7 +6,7 @@ class CGameCtl(CCustomGameCtl):
 	def __init__(self):
 		self.m_GameName = "IDGenerator"
 		self.m_SaveAttr = {
-			"m_IDList" : False
+			"m_IDList" : False,
 		}
 
 		self.m_IDList = {}

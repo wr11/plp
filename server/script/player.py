@@ -6,6 +6,8 @@ from gc import collect
 from pubdefines import GetPlayerProxy, IsProxyExist
 import rpc,conf
 
+INTERVAL_SAVEPLAYERS = 5*60
+
 if "PLAYER_LIST" not in globals():
 	PLAYER_LIST = {}
 
@@ -13,14 +15,17 @@ if "CONNECTID2OPENID" not in globals():
 	CONNECTID2OPENID = {}
 
 def Init():
-	Call_out(5*60, "saveplayer", SavePlayers)
+	Call_out(INTERVAL_SAVEPLAYERS, "saveplayer", SavePlayers)
+
+	PrintNotify("Player Inited")
 
 def SavePlayers():
 	global PLAYER_LIST
 	if not PLAYER_LIST:
+		Call_out(INTERVAL_SAVEPLAYERS, "saveplayer", SavePlayers)
 		return
 	lstRoleList = PLAYER_LIST.values()
-	Call_out(2, "truesaveplayer", TrueSavePlayer, lstRoleList)
+	TrueSavePlayer(list(lstRoleList))
 
 def TrueSavePlayer(lstPlayer):
 	data = {}
@@ -34,9 +39,12 @@ def TrueSavePlayer(lstPlayer):
 			data[oPlayer.m_OpenID] = playerdata
 		except:
 			continue
-	iServer, iIndex = conf.GetDBS()
-	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdatePlayerShadowData", data)
+	PrintDebug(data)
+	if data:
+		iServer, iIndex = conf.GetDBS()
+		rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdatePlayerShadowData", data)
 	if not lstPlayer:
+		Call_out(INTERVAL_SAVEPLAYERS, "saveplayer", SavePlayers)
 		return
 	Call_out(5, "truesaveplayer", TrueSavePlayer, lstPlayer)
 
@@ -70,10 +78,12 @@ class CPlayer:
 			"m_SendedNum": False,
 			"m_SendedList": False,
 			"m_GetPlpWay": False,
+			"m_SendedAllNum": False,
 		}
 
 		#需要存盘的数据
 		self.m_SendedNum = 0
+		self.m_SendedAllNum = 0
 		self.m_SendedList = []
 		self.m_GetPlpWay = 1		#1-不获取重复的 2-获取重复的
 
@@ -109,11 +119,23 @@ class CPlayer:
 		for sAttr, val in data.items():
 			setattr(self, sAttr, val)
 
-	def AddhPlp(self, iNum, sID):
-		self.m_SendedNum += iNum
-		if sID not in self.m_SendedList:
+	def AddPlp(self, iPlpID):
+		if iPlpID in self.m_SendedList:
 			PrintWarning("%s plpid repeated"%self.m_OpenID)
-			self.m_SendedList.append(sID)
+		else:
+			self.m_SendedList.append(iPlpID)
+			self.m_SendedNum += 1
+			self.m_SendedAllNum += 1
+			self.SetSaveState("m_SendedNum", True)
+			self.SetSaveState("m_SendedList", True)
+			self.SetSaveState("m_SendedAllNum", True)
+
+	def RemovePlp(self, iPlpID):
+		self.m_SendedNum -= 1
+		if self.m_SendedNum < 0:
+			self.m_SendedNum = 0
+		if iPlpID in self.m_SendedList:
+			self.m_SendedList.remove(iPlpID)
 		self.SetSaveState("m_SendedNum", True)
 		self.SetSaveState("m_SendedList", True)
 
@@ -182,6 +204,8 @@ def GetOpenIDByConnectID(iConnectID):
 @coroutine
 def PlayerOffLine(response, iConnectID):
 	sOpenID = GetOpenIDByConnectID(iConnectID)
+	if not sOpenID:
+		return
 	who_proxy = GetPlayerProxy(sOpenID)
 	if not who_proxy:
 		PrintWarning("%s player object has already unloaded"%sOpenID)

@@ -18,7 +18,7 @@ class CTimerManager:
 		try:
 			oFunc(*args, **kwargs)
 		except Exception as e:
-			self.Call_out(iTime, sFlag, oFunc)
+			self.Call_out(iTime, sFlag, oFunc, *args, **kwargs)
 			PrintError("timer %s excute error"%(sFlag))
 			raise
 

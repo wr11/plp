@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from pubdefines import MSGQUEUE_SEND, MSGQUEUE_RECV
+from pubdefines import MSGQUEUE_SEND, MSGQUEUE_RECV, CallManagerFunc
 from timer import Call_out
 
 import mq
 import script.netcommand as netcommand
-import script.link as link
 import conf
-import mylog
+import script.gameinit as gameinit
+import script.link as link
 import hotfix
+import mylog
 
 def RecvMq_Handler():
 	iMax = conf.GetMaxReceiveNum()
@@ -29,3 +30,15 @@ def run(oSendMq, oRecvMq, oConfInitFunc):
 	mq.SetMq(oSendMq, MSGQUEUE_SEND)
 	mq.SetMq(oRecvMq, MSGQUEUE_RECV)
 	Call_out(conf.GetInterval(), "RecvMq_Handler", RecvMq_Handler)
+	Call_out(5, "CheckConnects", CheckConnects)
+
+def CheckConnects():
+	lstNeedConnects = conf.GetConnects()
+	lstCheck = [(tConfig[0], tConfig[1]["iIndex"]) for tConfig in lstNeedConnects]
+	lstLinks = CallManagerFunc("link", "Links")
+	setUnConnected = set(lstCheck) - set(lstLinks)
+	if not setUnConnected:
+		gameinit.Init()
+	else:
+		PrintNotify("unconnect : %s"%(str(setUnConnected)))
+		Call_out(5, "CheckConnects", CheckConnects)
