@@ -228,6 +228,7 @@ class Runner(object):
 					self.result_future = None
 					return
 				except Exception as e:
+					PrintError(e)
 					self.finished = True
 					self.future = _null_future
 					self.result_future.set_exc_info(e)
@@ -278,6 +279,7 @@ def WaitMultiFuture(lstFuture):
 			try:
 				lstResult.append(f.result())
 			except Exception as e:
+				PrintError(e)
 				oFuture.set_exc_info(e)
 				return
 		oFuture.set_result(lstResult)

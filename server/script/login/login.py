@@ -36,9 +36,13 @@ def CheckRole(sOpenID):
 	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadPlayerDataShadow", sOpenID)
 	iCode, data = ret
 	iCode = int(iCode)
-	if data and iCode == 10:
-		player.GetPlayer(sOpenID).Load(data)
-		player.GetPlayer(sOpenID).m_Loaded = True
+	try:
+		if data and iCode == 10:
+			player.GetPlayer(sOpenID).Load(data)
+			player.GetPlayer(sOpenID).m_Loaded = True
+	except Exception as e:
+		PrintError(e)
+		iCode = 16
 	raise Return(iCode)
 
 def S2CLoginFailed(iConnectID, iRet):
