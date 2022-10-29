@@ -3,8 +3,8 @@
 import datahub.datashadow as shadow
 
 # Player Shadow
-def LoadPlayerDataShadow(oResponse, sOpenID):
-	oShadow = shadow.CreatePlayerDataShadow(sOpenID)
+def LoadPlayerDataShadow(oResponse, sOpenID, lstAttr):
+	oShadow = shadow.CreatePlayerDataShadow(sOpenID, lstAttr)
 	data = oShadow.LoadDataFromDataBase()
 	if not data:
 		try:
@@ -30,7 +30,6 @@ def UpdatePlayerShadowData(oResponse, data):
 	iRet = 0
 	try:
 		for sOpenID, dData in data.items():
-			PrintDebug("UpdatePlayerShadowData", sOpenID, dData)
 			if not dData:
 				continue
 			oShadow = shadow.GetPlayerShadowByOpenID(sOpenID)
@@ -45,8 +44,7 @@ def UpdatePlayerShadowData(oResponse, data):
 
 # Game Shadow
 def LoadGameShadow(oResponse, sGameName, lstAttr):
-	oShadow = shadow.CreateGameShadow(sGameName)
-	oShadow.Setattr(lstAttr)
+	oShadow = shadow.CreateGameShadow(sGameName, lstAttr)
 	data = oShadow.LoadDataFromDataBase()
 	if not data:
 		data = {}

@@ -7,6 +7,7 @@ from myutil.mycorotine import coroutine, WaitMultiFuture
 import conf
 import rpc
 
+INTERVAL_SAVEGAME = 5
 
 if "g_GameList" not in globals():
 	g_GameList = {}
@@ -52,7 +53,7 @@ def Init():
 		oGameCtl.m_Loaded = True
 		oGamectl.AfterLoad()
 
-	Call_out(5, "savegame", SaveGames)
+	Call_out(INTERVAL_SAVEGAME, "savegame", SaveGames)
 
 def SaveGames():
 	# 先不做分帧处理，后面活动多了再做
@@ -69,7 +70,9 @@ def SaveGames():
 			func = oGameCtl.OnSave
 			func()
 	iServer, iIndex = conf.GetDBS()
+	PrintDebug("=====",data)
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdateGameShadowData", data)
+	Call_out(INTERVAL_SAVEGAME, "savegame", SaveGames)
 
 class CGameCtl:
 	def __init__(self):
@@ -93,11 +96,14 @@ class CGameCtl:
 		pass
 
 	def AfterLoad(self):
+		# 用于填充默认值，否则Load后默认为None
 		pass
 
 	def Save(self):
 		data = {}
 		lstAttr = self.GetSaveAttrList()
+		if not lstAttr:
+			return data
 		for sAttr in lstAttr:
 			if self.GetAttrNeedSave(sAttr):
 				self.SetSaveState(sAttr, False)

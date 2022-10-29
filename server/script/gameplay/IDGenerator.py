@@ -11,6 +11,10 @@ class CGameCtl(CCustomGameCtl):
 
 		self.m_IDList = {}
 
+	def AfterLoad(self):
+		if not self.m_IDList:
+			self.m_IDList = {}
+
 	def GenerateIDByType(self, sType):
 		self.SetSaveState("m_IDList", True)
 		if sType not in self.m_IDList:

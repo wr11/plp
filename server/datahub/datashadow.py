@@ -3,8 +3,6 @@
 from datahub.mysql.mysqlbase import CMysqlBase, MYSQL_INSERT, MYSQL_UPDATE, MYSQL_SELECT, MYSQL_MANUAL
 from msgpack import packb, unpackb
 
-from mylog.logcmd import PrintDebug
-
 class CDataTableShadow(CMysqlBase):
 	"""
 	代表 mysql中的一个表，一次存取多条记录的数据
@@ -80,6 +78,11 @@ class CDataShadow(CMysqlBase):
 		super(CDataShadow, self).__init__(sType, sTblName, lstColName)
 		self.m_PrimaryData = sPrimary
 
+	def SetAttr(self, lstAttr):
+		for sAttr in lstAttr:
+			setattr(self, sAttr, None)
+		self.m_SaveAttr = lstAttr
+
 	def SaveToDataBase(self):
 		data = self.Save()
 		bData = packb(data)
@@ -88,7 +91,6 @@ class CDataShadow(CMysqlBase):
 	def UpdateDataBase(self):
 		data = self.Save()
 		bData = packb(data)
-		PrintDebug("UpdateDataBase",data)
 		self.Handler(MYSQL_UPDATE, bData, self.m_PrimaryData)
 
 	def LoadDataFromDataBase(self):
@@ -99,102 +101,6 @@ class CDataShadow(CMysqlBase):
 		data = unpackb(sData)
 		self.Load(data)
 		return data
-
-	def Load(data):
-		#need overwrite
-		pass
-
-	def Save():
-		#need overwrite
-		pass
-
-	def Update():
-		#need overwrite
-		pass
-
-if "g_PlayerShadowList" not in globals():
-	g_PlayerShadowList = {}
-
-#用户数据影子对象
-def CreatePlayerDataShadow(sOpenID):
-	oShadow = CPlayerDataShadow(sOpenID)
-	g_PlayerShadowList[sOpenID] = oShadow
-	return oShadow
-
-def RemovePlayerDataShadow(oResponse, sOpenID):
-	if not GetPlayerShadowByOpenID(sOpenID):
-		return
-	del g_PlayerShadowList[sOpenID]
-
-def GetPlayerShadowByOpenID(sOpenID):
-	return g_PlayerShadowList.get(sOpenID, None)
-
-class CPlayerDataShadow(CDataShadow):
-
-	def __init__(self, sOpenID):
-		super(CPlayerDataShadow, self).__init__("player", "tbl_player", ["openid", "data",], sOpenID)
-		self.m_OpenID = sOpenID
-		self.m_SendedNum = 0
-		self.m_SendedAllNum = 0
-		self.m_SendedList = []
-		self.m_GetPlpWay = 1
-
-	def Save(self):
-		data = {}
-		data["m_SendedNum"] = self.m_SendedNum
-		data["m_SendedList"] = self.m_SendedList
-		data["m_SendedAllNum"] = self.m_SendedAllNum
-		data["m_GetPlpWay"] = self.m_GetPlpWay
-		return data
-
-	def Load(self, data):
-		if not data:
-			return
-		self.m_SendedNum = data.get("m_SendedNum", 0)
-		self.m_SendedList = data.get("m_SendedList", [])
-		self.m_SendedAllNum = data.get("m_SendedAllNum", 0)
-		self.m_GetPlpWay = data.get("m_GetPlpWay", 0)
-
-	def Update(self, data):
-		if not data:
-			return
-		for sAttr, playerdata in data.items():
-			setattr(self, sAttr, playerdata)
-		self.UpdateDataBase()
-
-# Game Shadow
-if "g_GameShadowList" not in globals():
-	g_GameShadowList = {}
-
-def CreateGameShadow(sGameName):
-	oOldShadow = GetGameShadowByGameName(sGameName)
-	if oOldShadow:
-		return oOldShadow
-	oShadow = CGameCtlShadow(sGameName)
-	g_GameShadowList[sGameName] = oShadow
-	return oShadow
-
-def GetGameShadowByGameName(sGameName):
-	return g_GameShadowList.get(sGameName, None)
-
-def RemoveGameShadow(sGameName):
-	if not GetGameShadowByGameName(sGameName):
-		return
-	del g_GameShadowList[sGameName]
-
-class CGameCtlShadow(CDataShadow):
-	m_Type = "game"
-	m_TblName = "tbl_game"
-	m_ColName = ["game_name", "data",]
-
-	def __init__(self, sGameName):
-		super(CGameCtlShadow, self).__init__("game", "tbl_game", ["game_name", "data",], sGameName)
-		self.m_GameName = sGameName
-
-	def Setattr(self, lstAttr):
-		for sAttr in lstAttr:
-			setattr(self, sAttr, None)
-		self.m_SaveAttr = lstAttr
 
 	def Save(self):
 		data = {}
@@ -215,6 +121,63 @@ class CGameCtlShadow(CDataShadow):
 		for sAttr, playerdata in data.items():
 			setattr(self, sAttr, playerdata)
 		self.UpdateDataBase()
+
+#用户数据影子对象
+if "g_PlayerShadowList" not in globals():
+	g_PlayerShadowList = {}
+
+def CreatePlayerDataShadow(sOpenID, lstAttr):
+	oShadow = GetPlayerShadowByOpenID(sOpenID)
+	if oShadow:
+		return oShadow
+	oShadow = CPlayerDataShadow(sOpenID)
+	g_PlayerShadowList[sOpenID] = oShadow
+	oShadow.SetAttr(lstAttr)
+	return oShadow
+
+def RemovePlayerDataShadow(oResponse, sOpenID):
+	if not GetPlayerShadowByOpenID(sOpenID):
+		return
+	del g_PlayerShadowList[sOpenID]
+
+def GetPlayerShadowByOpenID(sOpenID):
+	return g_PlayerShadowList.get(sOpenID, None)
+
+class CPlayerDataShadow(CDataShadow):
+
+	def __init__(self, sOpenID):
+		super(CPlayerDataShadow, self).__init__("player", "tbl_player", ["openid", "data",], sOpenID)
+		self.m_OpenID = sOpenID
+
+# Game Shadow
+if "g_GameShadowList" not in globals():
+	g_GameShadowList = {}
+
+def CreateGameShadow(sGameName, lstAttr):
+	oOldShadow = GetGameShadowByGameName(sGameName)
+	if oOldShadow:
+		return oOldShadow
+	oShadow = CGameCtlShadow(sGameName)
+	oShadow.SetAttr(lstAttr)
+	g_GameShadowList[sGameName] = oShadow
+	return oShadow
+
+def GetGameShadowByGameName(sGameName):
+	return g_GameShadowList.get(sGameName, None)
+
+def RemoveGameShadow(sGameName):
+	if not GetGameShadowByGameName(sGameName):
+		return
+	del g_GameShadowList[sGameName]
+
+class CGameCtlShadow(CDataShadow):
+	m_Type = "game"
+	m_TblName = "tbl_game"
+	m_ColName = ["game_name", "data",]
+
+	def __init__(self, sGameName):
+		super(CGameCtlShadow, self).__init__("game", "tbl_game", ["game_name", "data",], sGameName)
+		self.m_GameName = sGameName
 
 
 # listContainer shadow

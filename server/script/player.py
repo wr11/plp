@@ -90,6 +90,22 @@ class CPlayer:
 	def __repr__(self):
 		return "<player(%s) %s %s>" % (self.m_ConnectID, self.m_OpenID, str(self.m_SaveState))
 
+	def AfterLoad(self):
+		if not self.m_SendedNum:
+			self.m_SendedNum = 0
+		if not self.m_SendedAllNum:
+			self.m_SendedAllNum = 0
+		if not self.m_SendedList:
+			self.m_SendedList = []
+		if not self.m_GetPlpWay:
+			self.m_GetPlpWay = 1
+
+	def GetSaveAttrList(self, bList = False):
+		if not bList:
+			return self.m_SaveState.keys()
+		else:
+			return list(self.m_SaveState.keys())
+
 	def GetConnectID(self):
 		return self.m_ConnectID
 
@@ -98,9 +114,6 @@ class CPlayer:
 
 	def GetAttrNeedSave(self, sAttr):
 		return self.m_SaveState[sAttr]
-
-	def GetSaveAttrList(self):
-		return self.m_SaveState.keys()
 
 	def Save(self):
 		data = {}
@@ -118,6 +131,14 @@ class CPlayer:
 			return
 		for sAttr, val in data.items():
 			setattr(self, sAttr, val)
+
+	def ResetPlp(self):
+		self.SetSaveState("m_SendedNum", True)
+		self.SetSaveState("m_SendedList", True)
+		self.SetSaveState("m_SendedAllNum", True)
+		self.m_SendedNum = 0
+		self.m_SendedList = []
+		self.m_SendedAllNum = 0
 
 	def AddPlp(self, iPlpID):
 		if iPlpID in self.m_SendedList:

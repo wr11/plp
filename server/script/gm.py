@@ -40,12 +40,13 @@ def GetAnswer(sOrder, who, *args):
 def LookGameCtl(who):
 	import script.player as player
 	import pubdefines
-	# import script.gameplay.basectl as gameplay
-	# iID = gameplay.GetGameCtl("IDGenerator").GenerateIDByType("test")
-	# PrintDebug(iID)
+	import script.gameplay.basectl as gameplay
+	iID = gameplay.GetGameCtl("IDGenerator").GenerateIDByType("test")
+	print(iID)
 	# who.AddPlp(78)
-	who.RemovePlp(78)
-	print(who.m_SendedNum, who.m_SendedList, who.m_SendedAllNum)
+	# who.RemovePlp(78)
+	# who.ResetPlp()
+	# print(who.m_SendedNum, who.m_SendedList, who.m_SendedAllNum)
 
 ORDER = {
 	"LookGameCtl": LookGameCtl,

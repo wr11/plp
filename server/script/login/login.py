@@ -16,7 +16,7 @@ def Login(iConnectID, oNetPackage):
 		return
 	oPlayer_proxy = GetPlayerProxy(sOpenID, False)
 	oPlayer_proxy.m_Login = 1
-	iRet = yield CheckRole(sOpenID)		#10为成功，10以上为失败码
+	iRet = yield CheckRole(sOpenID, oPlayer_proxy)		#10为成功，10以上为失败码
 	if iRet > 10:
 		S2CLoginFailed(iConnectID, iRet)
 		if IsProxyExist(oPlayer_proxy):
@@ -29,17 +29,18 @@ def Login(iConnectID, oNetPackage):
 	S2CLoginSuccess(sOpenID)
 
 @coroutine
-def CheckRole(sOpenID):
+def CheckRole(sOpenID, oPlayer_proxy):
 	import rpc
 	import conf
 	iServer, iIndex = conf.GetDBS()
-	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadPlayerDataShadow", sOpenID)
+	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadPlayerDataShadow", sOpenID, oPlayer_proxy.GetSaveAttrList(bList = True))
 	iCode, data = ret
 	iCode = int(iCode)
 	try:
 		if data and iCode == 10:
 			player.GetPlayer(sOpenID).Load(data)
 			player.GetPlayer(sOpenID).m_Loaded = True
+			player.GetPlayer(sOpenID).AfterLoad()
 	except Exception as e:
 		PrintError(e)
 		iCode = 16
