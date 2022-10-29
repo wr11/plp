@@ -7,7 +7,7 @@ from myutil.mycorotine import coroutine, WaitMultiFuture
 import conf
 import rpc
 
-INTERVAL_SAVEGAME = 5
+INTERVAL_SAVEGAME = 8 * 60
 
 if "g_GameList" not in globals():
 	g_GameList = {}
@@ -70,7 +70,6 @@ def SaveGames():
 			func = oGameCtl.OnSave
 			func()
 	iServer, iIndex = conf.GetDBS()
-	PrintDebug("=====",data)
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdateGameShadowData", data)
 	Call_out(INTERVAL_SAVEGAME, "savegame", SaveGames)
 
