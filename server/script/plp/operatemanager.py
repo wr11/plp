@@ -38,6 +38,7 @@ class CPlpOeration:
 		oPlp = CPlp()
 		oPlp.Load(dData)
 		self.m_DataCtl.Append(iID, oPlp)
+		who.AddPlp(iID)
 
 	def ValidPublishPlp(self, who, dData):
 		if not who.CheckPulishCnt(PUBLISHCNT_DAY):
@@ -74,10 +75,14 @@ class CPlpOeration:
 		lstSended = getattr(who_proxy, "m_SendedToClient", [])
 		iWay = who_proxy.GetPlpWay()
 		iMaxID = oGameCtl.GetCurIDByType(IDTYPE)
+		if iMaxID == 0:
+			return
 		iMinID = yield self.m_DataCtl.GetMinID()
+		if iMinID == 0:
+			return
 		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, 5)
 		lstPlpData = yield self.m_DataCtl.GetMultiPlpData(lstPlpID)
-		print(lstPlpData)
+		PrintDebug("----",lstPlpData)
 
 	def GetPlpIDList(self, iWay, lstSended, iMaxID, iMinID, iCount):
 		#待优化，iCount很多时会占很大内存
@@ -87,7 +92,7 @@ class CPlpOeration:
 			lstSelectable = list(setAll - setSended)
 			return GetUniqueRandomIDList(lstSelectable, iCount)
 		else:
-			return GetUniqueRandomIDList(range(iMinID, iMaxID+1), iCount)
+			return GetUniqueRandomIDList(list(range(iMinID, iMaxID+1)), iCount)
 
 if "g_PlpOeration" not in globals():
 	g_PlpOeration = CPlpOeration()

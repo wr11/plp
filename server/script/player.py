@@ -6,7 +6,7 @@ from gc import collect
 from pubdefines import GetPlayerProxy, IsProxyExist
 import rpc,conf
 
-INTERVAL_SAVEPLAYERS = 5*60
+INTERVAL_SAVEPLAYERS = 2
 
 if "PLAYER_LIST" not in globals():
 	PLAYER_LIST = {}
@@ -36,10 +36,12 @@ def TrueSavePlayer(lstPlayer):
 			continue
 		try:
 			playerdata = oPlayer.Save()
+			if not playerdata:
+				continue
 			data[oPlayer.m_OpenID] = playerdata
 		except:
 			continue
-	PrintDebug(data)
+
 	if data:
 		iServer, iIndex = conf.GetDBS()
 		rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdatePlayerShadowData", data)

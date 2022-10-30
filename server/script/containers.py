@@ -6,6 +6,7 @@ import timer
 import rpc
 import conf
 
+SAVE_LISTCONTAINER = 4
 
 #List Container
 if "g_ListContainer" not in globals():
@@ -20,7 +21,7 @@ def RegistListContainer(oContainer): #请勿重复注册
 	g_ListContainer[sTypeName] = oContainer
 
 def Init():
-	timer.Call_out(2 * 60, "listcontainer_save", SaveListContainer)
+	timer.Call_out(SAVE_LISTCONTAINER, "listcontainer_save", SaveListContainer)
 
 	PrintNotify("Containers Inited")
 
@@ -32,8 +33,13 @@ def SaveListContainer():
 		if not lstData:
 			continue
 		data[sTypeName] = lstData
+	# PrintDebug("======", data)
+	if not data:
+		timer.Call_out(SAVE_LISTCONTAINER, "listcontainer_save", SaveListContainer)
+		return
 	iServer, iIndex = conf.GetDBS()
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.ListContainerSaveToDBS", data)
+	timer.Call_out(SAVE_LISTCONTAINER, "listcontainer_save", SaveListContainer)
 
 class CListContainer(list):
 	"""
@@ -89,6 +95,7 @@ class CListContainer(list):
 		ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadDataFromTableShadow", self.m_TypeName, sSelectType)
 		raise Return(ret)
 
+	@coroutine
 	def SelectMultiDataFromDB(self, sSelectType, lstPrimaryData):
 		"""
 		sSelectType 为select from之间的值，可以为*,max(字段名), min(字段名), sum(字段名), avg(字段名)以及具体字段名等合法值
@@ -104,5 +111,4 @@ class CListContainer(list):
 				data[i] = self.GetItem(i)
 		iServer, iIndex = conf.GetDBS()
 		ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadMultiDataFromTableShadow", self.m_TypeName, sSelectType, lstNewPrimaryData)
-		PrintDebug("----------",data, ret)
 		raise Return(ret)

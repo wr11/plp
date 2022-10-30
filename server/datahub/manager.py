@@ -65,7 +65,7 @@ def UpdateGameShadowData(oResponse, data):
 
 #listcontainer shadow
 def ListContainerSaveToDBS(oResponse, data):
-	for sType, lstData in data:
+	for sType, lstData in data.items():
 		oShadow = shadow.GetListContainerShadowByType(sType)
 		if not oShadow:
 			oShadow = shadow.CreateListContainerShadow(sType)

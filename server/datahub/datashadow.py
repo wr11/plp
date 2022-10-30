@@ -38,7 +38,7 @@ class CDataTableShadow(CMysqlBase):
 
 		self.m_ListData = []
 
-	def RepairData(dData):
+	def RepairData(self, dData):
 		#有需要时重写，可以用来线上修正数据
 		return dData
 
@@ -65,8 +65,15 @@ class CDataTableShadow(CMysqlBase):
 			sStatement = "SELECT %s FROM %s"%(sSelectType ,self.m_TblName)
 			ret = self.Handler(MYSQL_MANUAL, Statement = sStatement)
 		else:
-			sStatement = "SELECT %s FROM %s WHERE %s IN %s"%(sSelectType ,self.m_TblName, self.m_ColName[0])
+			sStatement = "SELECT %s FROM %s WHERE %s IN %s"%(sSelectType ,self.m_TblName, self.m_ColName[0], "%s")
 			ret = self.Handler(MYSQL_MANUAL, filter, Statement = sStatement)
+
+		if ret:
+			for dResult in ret:
+				if self.m_ColName[1] in dResult:
+					bData = dResult[self.m_ColName[1]]
+					unpack = unpackb(bData)
+					dResult[self.m_ColName[1]] = unpack
 		return ret
 
 class CDataShadow(CMysqlBase):
@@ -90,6 +97,7 @@ class CDataShadow(CMysqlBase):
 
 	def UpdateDataBase(self):
 		data = self.Save()
+		PrintDebug("UpdateDataBase", data)
 		bData = packb(data)
 		self.Handler(MYSQL_UPDATE, bData, self.m_PrimaryData)
 

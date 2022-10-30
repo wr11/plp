@@ -7,7 +7,7 @@ from myutil.mycorotine import coroutine, WaitMultiFuture
 import conf
 import rpc
 
-INTERVAL_SAVEGAME = 8 * 60
+INTERVAL_SAVEGAME = 6
 
 if "g_GameList" not in globals():
 	g_GameList = {}
@@ -46,8 +46,6 @@ def Init():
 	for iIndex, sGameName in enumerate(lstName):
 		oGameCtl = GetGameCtl(sGameName)
 		if not oGameCtl:
-			continue
-		if not lstData[iIndex]:
 			continue
 		oGameCtl.Load(lstData[iIndex])
 		oGameCtl.m_Loaded = True

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from mylog.logcmd import PrintError
+from myutil.mycorotine import coroutine
 from script.common import OpenTips
 from pubtool import Functor
 
@@ -36,17 +37,18 @@ def GetAnswer(sOrder, who, *args):
 		TrueExecGMOrder(who, sOrder)
 
 
-
 def LookGameCtl(who):
 	import script.player as player
-	import pubdefines
+	from pubdefines import CallManagerFunc, GetPlayerProxy
 	import script.gameplay.basectl as gameplay
-	iID = gameplay.GetGameCtl("IDGenerator").GenerateIDByType("test")
-	print(iID)
+	# CallManagerFunc("plp", "PublishPlp", who, {"content":"今天很开心", "password":"123456", "location":"china"})
+	# gameplay.GetGameCtl("IDGenerator").GenerateIDByType("test")
+	print("gm idgenerator", gameplay.GetGameCtl("IDGenerator").m_IDList)
 	# who.AddPlp(78)
 	# who.RemovePlp(78)
 	# who.ResetPlp()
-	# print(who.m_SendedNum, who.m_SendedList, who.m_SendedAllNum)
+	print("gm playerinfo", who.m_SendedNum, who.m_SendedList, who.m_SendedAllNum, who.m_GetPlpWay)
+	CallManagerFunc("plp", "GetFivePlp", GetPlayerProxy(who.m_OpenID))
 
 ORDER = {
 	"LookGameCtl": LookGameCtl,
