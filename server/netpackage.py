@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-
+# 网络数据打包工具
+# 注意: 打包整形数据时，如果确定整数大小则尽量使用具体的PacketAddInt8，PacketAddInt16，PacketAddInt32，不知道具体大小再使用PacketAddInt
 # NOTE: unpack最后记得del netpack对象！！！！！！
 
 from pubdefines import CallManagerFunc
@@ -34,14 +35,18 @@ def PacketPrepare(header = 0):
 		PacketAddInt16(header, oNetPack)
 	return oNetPack
 
-def PacketAddI(iVal, oNetPack):
+def PacketAddInt(iVal, oNetPack):
 	if iVal <= 255:
+		PacketAddInt8(1, oNetPack)
 		PacketAddInt8(iVal, oNetPack)
 	elif 255 < iVal <= 65535:
+		PacketAddInt8(2, oNetPack)
 		PacketAddInt16(iVal, oNetPack)
 	elif 65535 < iVal <= 4294967295:
+		PacketAddInt8(4, oNetPack)
 		PacketAddInt32(iVal, oNetPack)
 	elif 4294967296 < iVal <= 9223372036854775807:
+		PacketAddInt8(8, oNetPack)
 		PacketAddInt64(iVal, oNetPack)
 	else:
 		PrintError("protocol error: python int value bigger than int64 %s"%(iVal))
@@ -100,18 +105,7 @@ def PacketAddS(sVal, oNetPack):
 	"""
 	sEncodeStr = sVal.encode('utf-8')
 	iLen = len(sEncodeStr)
-	if iLen <= 255:
-		PacketAddInt8(1, oNetPack)
-	elif 255 < iLen <= 65535:
-		PacketAddInt8(2, oNetPack)
-	elif 65535 < iLen <= 4294967295:
-		PacketAddInt8(4, oNetPack)
-	elif 4294967296 < iLen <= 9223372036854775807:
-		PacketAddInt8(8, oNetPack)
-	else:
-		PacketAddInt8(8, oNetPack)
-		PrintError("netpack: string len exceeded!")
-	PacketAddI(iLen, oNetPack)
+	PacketAddInt(iLen, oNetPack)
 	if iLen == 1:
 		PacketAddC(sEncodeStr, oNetPack)
 	else:
@@ -186,6 +180,19 @@ def UnpackPrepare(byteData):
 	oNetPackage = NetPackagePrepare(byteData)
 	return oNetPackage
 
+def UnpackInt(oNetPackage):
+	iByte = UnpackInt8(oNetPackage)
+	if iByte == 1:
+		return UnpackInt8(oNetPackage)
+	elif iByte == 2:
+		return UnpackInt16(oNetPackage)
+	elif iByte == 4:
+		return UnpackInt32(oNetPackage)
+	elif iByte == 8:
+		return UnpackInt64(oNetPackage)
+	else:
+		PrintError("netpackage error: unpack int bigger than int64")
+
 def UnpackInt8(oNetPackage):
 	"""
 	无符号1字节整形 0-255
@@ -227,19 +234,7 @@ def UnpackS(oNetPackage):
 	"""
 	默认最长4294967295字节，需要限制字符串长度
 	"""
-	iBt = UnpackInt8(oNetPackage)
-	iLen = 0
-	if iBt == 1:
-		iLen = UnpackInt8(oNetPackage)
-	elif iBt == 2:
-		iLen = UnpackInt16(oNetPackage)
-	elif iBt == 4:
-		iLen = UnpackInt32(oNetPackage)
-	elif iBt == 8:
-		iLen = UnpackInt64(oNetPackage)
-	else:
-		iLen = UnpackInt64(oNetPackage)
-		PrintWarning("netpack: string len exceeded!")
+	iLen = UnpackInt(oNetPackage)
 	if iLen == 1:
 		return UnpackC(oNetPackage)
 	else:

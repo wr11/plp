@@ -1,5 +1,6 @@
 /*
-
+网络数据打包工具
+注意: 打包整形数据时，如果确定整数大小则尽量使用具体的PacketAddInt8，PacketAddInt16，PacketAddInt32，不知道具体大小再使用PacketAddInt
 */
 
 import {ARRAYBUFFER_UTILS, STRING_ARRAYBUFFER} from 'handlebytes.js'
@@ -88,29 +89,44 @@ export const NetPack = {
     }
     setTimeout(removeProtocolCB, 10000, header)
     let oNetPack = new CNetPackage(null)
-    this.PacketAddI(header, oNetPack)
+    this.PacketAddInt16(header, oNetPack)
     return oNetPack
   },
 
-  PacketAddI: function PacketAddI(iVal, oNetPack){
+  PacketAddInt: function PacketAddInt(iVal, oNetPack){
     if (iVal <= 255){
-      let uint8array = new Uint8Array(1)
-      uint8array[0] = iVal
-      oNetPack.PackInto("B", uint8array.buffer)
+      this.PacketAddInt8(1, oNetPack)
+      this.PacketAddInt8(iVal, oNetPack)
     }
     else if (iVal > 255 && iVal <= 65535 ) {
-      let uint16array = new Uint16Array(1)
-      uint16array[0] = iVal
-      oNetPack.PackInto("H", uint16array.buffer)
+      this.PacketAddInt8(2, oNetPack)
+      this.PacketAddInt16(iVal, oNetPack)
     }
     else if (iVal > 65535 && iVal <= 4294967295 ) {
-      let uint32array = new Uint32Array(1)
-      uint32array[0] = iVal
-      oNetPack.PackInto("I", uint32array.buffer)
+      this.PacketAddInt8(4, oNetPack)
+      this.PacketAddInt32(iVal, oNetPack)
     }
     else{
       throw new Error("val pack exceeded", iVal)
     }
+  },
+
+  PacketAddInt8: function PacketAddInt8(iVal, oNetPack){
+    let uint8array = new Uint8Array(1)
+    uint8array[0] = iVal
+    oNetPack.PackInto("B", uint8array.buffer)
+  },
+
+  PacketAddInt16: function PacketAddInt16(iVal, oNetPack){
+    let uint16array = new Uint16Array(1)
+    uint16array[0] = iVal
+    oNetPack.PackInto("H", uint16array.buffer)
+  },
+
+  PacketAddInt32: function PacketAddInt32(iVal, oNetPack){
+    let uint32array = new Uint32Array(1)
+    uint32array[0] = iVal
+    oNetPack.PackInto("I", uint32array.buffer)
   },
 
   PacketAddBool: function PacketAddBool(bVal, oNetPack){
@@ -118,26 +134,13 @@ export const NetPack = {
     if (bVal == true){
       iVal = 1
     }
-    this.PacketAddI(iVal, oNetPack)
+    this.PacketAddInt8(iVal, oNetPack)
   },
 
   PacketAddS: function PacketAddS(str, oNetPack){
     let arraybuffer = STRING_ARRAYBUFFER.string2arraybuffer(str)
     let iStrLen = arraybuffer.byteLength
-    if (iStrLen <= 255){
-      this.PacketAddI(1, oNetPack)
-    }
-    else if (255 < iStrLen <= 65535){
-      this.PacketAddI(2, oNetPack)
-    }
-    else if (65535 < iStrLen <= 4294967295){
-      this.PacketAddI(4, oNetPack)
-    }
-    else{
-      this.PacketAddI(4, oNetPack)
-      console.log("netpack: string len exceeded!")
-    }
-    this.PacketAddI(iStrLen, oNetPack)
+    this.PacketAddInt(iStrLen, oNetPack)
     oNetPack.PackInto("S", arraybuffer)
   },
 
@@ -156,6 +159,22 @@ export const NetPack = {
     let oNetPack = new CNetPackage(arraybuffer)
     oNetPack.UnpackPrepare()
     return oNetPack
+  },
+
+  UnpackInt: function UnpackInt(oNetPack){
+    let iByte = this.UnpackInt8(oNetPack)
+    if (iByte == 1){
+      return this.UnpackInt8(oNetPack)
+    }
+    else if (iByte == 2){
+      return this.UnpackInt16(oNetPack)
+    }
+    else if (iByte == 4){
+      return this.UnpackInt32(oNetPack)
+    }
+    else{
+      throw new Error("netpackage error: UnpackInt bigger than int32")
+    }
   },
 
   UnpackInt8: function UnpackInt8(oNetPack){
@@ -180,22 +199,7 @@ export const NetPack = {
   },
 
   UnpackString: function UnpackString(oNetPack){
-    let iBt = this.UnpackInt8(oNetPack)
-    let iLen = 0
-    if (iBt == 1){
-      iLen = this.UnpackInt8(oNetPack)
-    }
-    else if (iBt == 2){
-      iLen = this.UnpackInt16(oNetPack)
-    }
-    else if (iBt == 4){
-      iLen = this.UnpackInt32(oNetPack)
-    }
-    else{
-      iLen = this.UnpackInt32(oNetPack)
-      console.log("netpack: string len exceeded!")
-    }
-
+    let iLen = this.UnpackInt(oNetPack)
     return oNetPack.Unpack("S", iLen)
   }
 }

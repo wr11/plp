@@ -72,10 +72,15 @@ def GMQueryTimeLimitData(who):
 	PrintDebug(who.QueryTimeLimitData("test", [1,2,3]))
 
 ORDER = {
-	"LookGameCtl": GMLookGameCtl,
-	"TimeInfo" : GMTime,
-	"PushTime" : GMPushTime,
-	"RealTime" : GMResetTimeOffset,
-	"SetTimeLimitData" : GMSetTimeLimitData,
-	"QueryTimeLimitData" : GMQueryTimeLimitData,
+	"LookGameCtl": (GMLookGameCtl, ""),
+	"TimeInfo" : (GMTime, ""),
+	"PushTime" : (GMPushTime, ""),
+	"RealTime" : (GMResetTimeOffset, ""),
+	"SetTimeLimitData" : (GMSetTimeLimitData, ""),
+	"QueryTimeLimitData" : (GMQueryTimeLimitData, ""),
 }
+
+"""
+ORDER {指令名称 : (指令函数, 函数参数)}
+其中 函数参数 为一个字符串，如果不需要参数则为空字符串
+"""

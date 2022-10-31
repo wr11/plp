@@ -42,7 +42,7 @@ function showToast(sDesc, sIcon, sMsg, iDuration, bMask, bNeedCallBack){
         return
       }
       oNetPack = NetPack.PacketPrepare(PROTOCOL.C2S_TOASTCB)
-      NetPack.PacketAddI(1, oNetPack)
+      NetPack.PacketAddInt8(1, oNetPack)
       NetPack.PacketAddS(sDesc, oNetPack)
       NetPack.PacketSend(oNetPack)
     }
@@ -71,7 +71,7 @@ function showModal(sDesc, sTitle, sContent, sConfirmText, sConfirmColor, bShowCa
       let bComfirm = res.confirm
       let bCancel = res.cancel
       let oNetPack = NetPack.PacketPrepare(PROTOCOL.C2S_MODALCB)
-      NetPack.PacketAddI(2, oNetPack)
+      NetPack.PacketAddInt8(2, oNetPack)
       NetPack.PacketAddS(sDesc, oNetPack)
       NetPack.PacketAddS(sContent, oNetPack)
       NetPack.PacketAddBool(bComfirm, oNetPack)

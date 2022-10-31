@@ -48,10 +48,10 @@ def CheckRole(sOpenID, oPlayer_proxy):
 
 def S2CLoginFailed(iConnectID, iRet):
 	oNetPack = np.PacketPrepare(CS_LOGIN)
-	np.PacketAddI(iRet, oNetPack)
+	np.PacketAddInt8(iRet, oNetPack)
 	np.GPSPacketSendByConnectID(iConnectID, oNetPack)
 
 def S2CLoginSuccess(sOpenID):
 	oNetPack = np.PacketPrepare(CS_LOGIN)
-	np.PacketAddI(1, oNetPack)
+	np.PacketAddInt8(1, oNetPack)
 	np.PacketSend(sOpenID, oNetPack)

@@ -125,7 +125,7 @@ def GateHandle(iConnectID, iDataHeader):
 def SendHello(iConnectID):
 	global g_ServerState
 	oNetPack = np.PacketPrepare(CS_HELLO)
-	np.PacketAddI(g_ServerState, oNetPack)
+	np.PacketAddInt8(g_ServerState, oNetPack)
 	np.PacketSend(iConnectID, oNetPack)
 
 def SendAppKey(iConnectID):

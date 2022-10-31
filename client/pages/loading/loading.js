@@ -94,6 +94,8 @@ Page({
         console.log("connect to server success",SERVER_IP,SERVER_PORT)
         app.globalData.connectstate = true
         let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_HELLO, that.onServerHello)
+        NetPack.PacketAddInt(1314, oNetPack)
+        NetPack.PacketAddS("hello from client", oNetPack)
         NetPack.PacketSend(oNetPack)
       })
     oTcp.onMessage((message) => {
@@ -136,6 +138,7 @@ Page({
       })
       return
     }
+
     this.updateProgress(25)
     this.checkNeedLoginWX()
   },
