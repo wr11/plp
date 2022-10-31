@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from pubdefines import MSGQUEUE_SEND, MSGQUEUE_RECV
-from pubtool import Functor
+from pubdefines import MSGQUEUE_SEND, MSGQUEUE_RECV, Functor
 
 import multiprocessing
 import script

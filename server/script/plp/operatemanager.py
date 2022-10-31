@@ -3,7 +3,7 @@
 from myutil.mycorotine import coroutine
 from script.plp.datactl import GetDatCtl
 from script.common import OpenTips
-from script.plp.defines import PUBLISHCNT_DAY, IDTYPE
+from script.plp.defines import PUBLISHCNT_DAY, IDTYPE, PLP_PUBLISH_FLAG, PLP_GET_FLAG, GETCNT_DAY
 from script.gameplay.basectl import GetGameCtl
 from myutil.myrandom import GetUniqueRandomIDList
 
@@ -39,9 +39,13 @@ class CPlpOeration:
 		oPlp.Load(dData)
 		self.m_DataCtl.Append(iID, oPlp)
 		who.AddPlp(iID)
+		iOldCnt = who.QueryTimeLimitData(PLP_PUBLISH_FLAG, 0)
+		iOldCnt += 1
+		who.SetTimeLimitData(PLP_PUBLISH_FLAG, iOldCnt, "day5")
 
 	def ValidPublishPlp(self, who, dData):
-		if not who.CheckPulishCnt(PUBLISHCNT_DAY):
+		iCnt = who.QueryTimeLimitData(PLP_PUBLISH_FLAG, 0)
+		if iCnt >= PUBLISHCNT_DAY:
 			OpenTips(who.m_OpenID, 1, "", "none", "每天最多发%s个"%PUBLISHCNT_DAY)
 			return 0
 		sContent = dData["content"]
@@ -53,8 +57,12 @@ class CPlpOeration:
 	def CheckContentIllegal(self, sContent):
 		return True
 
-	def ValidGetPlp(self, who):
-		return True
+	def ValidGetPlp(self, who_proxy):
+		iCnt = who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)
+		if iCnt >= GETCNT_DAY:
+			OpenTips(who_proxy.m_OpenID, 1, "", "none", "每天最浏览%s个"%GETCNT_DAY)
+			return 0
+		return 1
 
 	def ResetSendedCache(self, who):
 		OpenTips(who.m_OpenID, 1, "", "success", "操作成功")
@@ -83,6 +91,12 @@ class CPlpOeration:
 		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, 5)
 		lstPlpData = yield self.m_DataCtl.GetMultiPlpData(lstPlpID)
 		PrintDebug("----",lstPlpData)
+		if not pubdefines.IsProxyExist(who_proxy):
+			return
+		iLen = len(lstPlpData)
+		iOldCnt = who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)
+		iOldCnt += iLen
+		who_proxy.SetTimeLimitData(PLP_GET_FLAG, iOldCnt, "day5")
 
 	def GetPlpIDList(self, iWay, lstSended, iMaxID, iMinID, iCount):
 		#待优化，iCount很多时会占很大内存

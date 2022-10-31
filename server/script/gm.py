@@ -3,7 +3,7 @@
 from mylog.logcmd import PrintError
 from myutil.mycorotine import coroutine
 from script.common import OpenTips
-from pubtool import Functor
+from pubdefines import Functor, CallManagerFunc, GetPlayerProxy, GetDay0Sec, GetNowTime, GetDayNo, GetDay5Sec, SetTimeOffset, TimeStr, ResetTimeOffset
 
 import netpackage as np
 
@@ -37,9 +37,8 @@ def GetAnswer(sOrder, who, *args):
 		TrueExecGMOrder(who, sOrder)
 
 
-def LookGameCtl(who):
+def GMLookGameCtl(who):
 	import script.player as player
-	from pubdefines import CallManagerFunc, GetPlayerProxy
 	import script.gameplay.basectl as gameplay
 	# CallManagerFunc("plp", "PublishPlp", who, {"content":"今天很开心", "password":"123456", "location":"china"})
 	# gameplay.GetGameCtl("IDGenerator").GenerateIDByType("test")
@@ -50,6 +49,33 @@ def LookGameCtl(who):
 	print("gm playerinfo", who.m_SendedNum, who.m_SendedList, who.m_SendedAllNum, who.m_GetPlpWay)
 	CallManagerFunc("plp", "GetFivePlp", GetPlayerProxy(who.m_OpenID))
 
+def GMTime(who):
+	PrintDebug("GetNowTime true", TimeStr(GetNowTime(True)), GetNowTime(True))
+	PrintDebug("GetNowTime false", TimeStr(GetNowTime()), GetNowTime())
+	# PrintDebug("GetDayNo", GetDayNo())
+	# PrintDebug("GetDay0Sec", GetDay0Sec(GetDayNo()))
+	# PrintDebug("GetDay5Sec", GetDay5Sec(GetDayNo()))
+
+def GMPushTime(who):
+	SetTimeOffset(24 * 60 * 60)
+	PrintDebug("当前时间已推进至：", TimeStr(GetNowTime()), GetNowTime())
+
+def GMResetTimeOffset(who):
+	ResetTimeOffset()
+	PrintDebug("已恢复真实时间", TimeStr(GetNowTime()), GetNowTime())
+
+def GMSetTimeLimitData(who):
+	who.SetTimeLimitData("test", 999, "day5")
+
+def GMQueryTimeLimitData(who):
+	# PrintDebug(who.QueryTimeLimitData("none", [1,2,3]))
+	PrintDebug(who.QueryTimeLimitData("test", [1,2,3]))
+
 ORDER = {
-	"LookGameCtl": LookGameCtl,
+	"LookGameCtl": GMLookGameCtl,
+	"TimeInfo" : GMTime,
+	"PushTime" : GMPushTime,
+	"RealTime" : GMResetTimeOffset,
+	"SetTimeLimitData" : GMSetTimeLimitData,
+	"QueryTimeLimitData" : GMQueryTimeLimitData,
 }

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import threading
-import pubtool
 import pubdefines
-import pubtool
 
 class CTimerManager:
 	def __init__(self):
@@ -23,7 +21,7 @@ class CTimerManager:
 			raise
 
 	def Call_out(self, iTime, sFlag, oFunc, *args, **kwargs):
-		oExecFunc = pubtool.Functor(self._Execute, iTime, oFunc, sFlag)
+		oExecFunc = pubdefines.Functor(self._Execute, iTime, oFunc, sFlag)
 		oTimer = self._CreateTimer(iTime, oExecFunc, *args, **kwargs)
 		self.m_Map[sFlag] = oTimer
 		oTimer.start()

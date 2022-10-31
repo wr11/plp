@@ -3,7 +3,7 @@
 from myutil.mycorotine import coroutine, Return
 from timer import Call_out, GetTimer, Remove_Call_out
 from gc import collect
-from pubdefines import GetPlayerProxy, IsProxyExist
+from pubdefines import GetPlayerProxy, IsProxyExist, GetNowTime, GetDay5Sec, GetDayNo, GetDay0Sec
 import rpc,conf
 
 INTERVAL_SAVEPLAYERS = 2
@@ -65,12 +65,14 @@ def SaveOnePlayer(oPlayer_proxy):
 		PrintError(oPlayer_proxy, e)
 		bFinish = False
 	if bFinish:
+		PrintDebug("SaveOnePlayer", data)
 		iServer, iIndex = conf.GetDBS()
 		ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.UpdatePlayerShadowData", data)
 		raise Return(ret)
 	else:
 		raise Return(0)
 
+# NOTE TODO: player中只加必要的接口和属性，尽量减少属性和方法数量，后期数量较多后会使用mixin提升效率并节省空间
 class CPlayer:
 	def __init__(self, sOpenID, iConnectID):
 		self.m_OpenID = sOpenID
@@ -81,6 +83,7 @@ class CPlayer:
 			"m_SendedList": False,
 			"m_GetPlpWay": False,
 			"m_SendedAllNum": False,
+			"m_TimeLimitData": 	False,
 		}
 
 		#需要存盘的数据
@@ -88,11 +91,13 @@ class CPlayer:
 		self.m_SendedAllNum = 0
 		self.m_SendedList = []
 		self.m_GetPlpWay = 1		#1-不获取重复的 2-获取重复的
+		self.m_TimeLimitData = {}		#限时数据，如 每日固定时间重置，或到某时间点过期的数据（惰性检查，取数据时候检查是否到期，所以访问数据需要使用接口，勿直接访问该数据结构）
 
 	def __repr__(self):
 		return "<player(%s) %s %s>" % (self.m_ConnectID, self.m_OpenID, str(self.m_SaveState))
 
 	def AfterLoad(self):
+		# Load后没有数据的需要赋默认值，否则为None
 		if not self.m_SendedNum:
 			self.m_SendedNum = 0
 		if not self.m_SendedAllNum:
@@ -101,6 +106,8 @@ class CPlayer:
 			self.m_SendedList = []
 		if not self.m_GetPlpWay:
 			self.m_GetPlpWay = 1
+		if not self.m_TimeLimitData:
+			self.m_TimeLimitData = {}
 
 	def GetSaveAttrList(self, bList = False):
 		if not bList:
@@ -162,15 +169,56 @@ class CPlayer:
 		self.SetSaveState("m_SendedNum", True)
 		self.SetSaveState("m_SendedList", True)
 
-	def CheckPulishCnt(self, iNum):
-		return True
-
 	def GetPlpWay(self):
 		return self.m_GetPlpWay
 
 	def SetPlpWay(self, iWay):
 		self.SetSaveState("m_GetPlpWay", True)
 		self.m_GetPlpWay = iWay
+
+	def SetTimeLimitData(self, key, val, timelimit):
+		"""
+		key 获取数据的key key重复时会覆盖数据和过期时间
+		val 数据的值
+		timelimit 为int时，自己设定过期时间 为string时，"day5"-表示下一次凌晨5点过期 "day0"-表示当日24点过期
+
+		如果需要追加数据，为了通用性，需要先query，增加数据之后再重新set回来，如果只是set则不用query，直接set即可
+		"""
+		iExpireTime = -1
+		if type(timelimit) == int:
+			iExpireTime = timelimit
+		elif type(timelimit) == str:
+			if timelimit == "day5":
+				iExpireTime = GetDay5Sec(GetDayNo())
+			elif timelimit == "day0":
+				iExpireTime = GetDay0Sec(GetDayNo())
+			
+		if iExpireTime == -1:
+			raise Exception("SetTimeLimitData error, timelimit is invalid")
+		self.SetSaveState("m_TimeLimitData", True)
+		self.m_TimeLimitData[key] = (val, iExpireTime)
+
+	def QueryTimeLimitData(self, key, default = None):
+		"""
+		获取时会进行过期检查
+		key 数据的key
+		default 不存在或者过期时，默认返回值
+		"""
+		if key in self.m_TimeLimitData:
+			_, iExpireTime = self.m_TimeLimitData[key]
+			if iExpireTime <= GetNowTime():
+				self.SetSaveState("m_TimeLimitData", True)
+				del self.m_TimeLimitData[key]
+		tData = self.m_TimeLimitData.get(key, ())
+		if not tData:
+			return default
+		return tData[0]
+
+	def DeleteTimeLimitData(self, key):
+		if key in self.m_TimeLimitData:
+			self.SetSaveState("m_TimeLimitData", True)
+			del self.m_TimeLimitData[key]
+
 
 def MakePlayer(sOpenID, iConnectID):
 	oPlayer = CPlayer(sOpenID, iConnectID)

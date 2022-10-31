@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from io import BytesIO
 from protocol import *
-from pubtool import CTimeOutManager
+from pubdefines import CTimeOutManager
 from timer import *
 from myutil.mycorotine import Future
 
 import mq
-import pubdefines
 import struct
 import random
 import msgpack
