@@ -77,13 +77,13 @@ def SaveOnePlayer(oPlayer_proxy, force = False):
 		raise Return(0)
 
 def KickoutPlayers(cb):
-	from script.gm.defines import AUTH_OPENID
+	from script.gm.defines import IsAuth
 	lstPlayer = GetAllPlayers()
 	if not lstPlayer:
 		cb(1)
 		return
 	for oPlayer in lstPlayer:
-		if oPlayer.m_OpenID in AUTH_OPENID:
+		if IsAuth(oPlayer.m_OpenID):
 			continue
 		SaveOnePlayer(weakref.proxy(oPlayer), force = True)
 		S2COffline(oPlayer.m_OpenID)

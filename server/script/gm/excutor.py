@@ -3,14 +3,14 @@
 from myutil.mycorotine import coroutine, Future
 from script.common import OpenTips
 from pubdefines import Functor, CallManagerFunc, GetPlayerProxy, GetDay0Sec, GetNowTime, GetDayNo, GetDay5Sec, SetTimeOffset, TimeStr, ResetTimeOffset
-from script.gm.defines import AUTH_OPENID
+from script.gm.defines import IsAuth
 
 import netpackage as np
 import conf
 
 def ExecGMOrder(who, oNetPackage):
 	sOpenID = who.m_OpenID
-	if sOpenID not in AUTH_OPENID:
+	if IsAuth(sOpenID):
 		OpenTips(who.m_OpenID, 1, "", "none", "当前账号无GM权限")
 		return
 	sOrder = np.UnpackS(oNetPackage)
@@ -216,6 +216,9 @@ def GMSetGetPlpWay(who, iWay):
 	who.SetPlpWay(iWay)
 	PrintDebug("当前plp获取方式：", who.GetPlpWay())
 
+def GMGetPlpCount(who):
+	CallManagerFunc("plp", "GetPlpCount")
+
 ORDER = {
 	"GMExample" : (GMExample, "isbdlte"),
 	"SendMsg2All" : (GMSendMsg2All, "si"),
@@ -233,6 +236,7 @@ ORDER = {
 	"PublisePlp" : (GMPublishPlp, ""),
 	"Get5Plp" : (GMGet5Plp, ""),
 	"LookIIDList" : (GMLookIDList, ""),
+	"GetPlpCount" : (GMGetPlpCount, ""),
 }
 
 """

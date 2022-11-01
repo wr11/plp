@@ -107,7 +107,7 @@ class CListContainer(list):
 	@coroutine
 	def SelectSingleDataFromDB(self, sSelectType):
 		"""
-		sSelectType 为select from之间的值，可以为*,max(字段名), min(字段名), sum(字段名), avg(字段名)以及具体字段名等合法值
+		sSelectType 为select from之间的值，可以为*,max(字段名/*), min(字段名/*), sum(字段名/*), avg(字段名/*), COUNT(字段名/*)以及具体字段名等合法值
 		"""
 		iServer, iIndex = conf.GetDBS()
 		ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadDataFromTableShadow", self.m_TypeName, sSelectType)

@@ -58,7 +58,6 @@ class CPlpOeration:
 		return True
 
 	def ValidGetPlp(self, who_proxy):
-		return 1
 		iCnt = who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)
 		if iCnt >= GETCNT_DAY:
 			OpenTips(who_proxy.m_OpenID, 1, "", "none", "每天最浏览%s个"%GETCNT_DAY)
@@ -111,6 +110,11 @@ class CPlpOeration:
 			return GetUniqueRandomIDList(lstSelectable, iCount)
 		else:
 			return GetUniqueRandomIDList(list(range(iMinID, iMaxID+1)), iCount)
+
+	@coroutine
+	def GetPlpCount(self):
+		ret = yield self.m_DataCtl.GetPlpCount()
+		PrintDebug(ret)
 
 if "g_PlpOeration" not in globals():
 	g_PlpOeration = CPlpOeration()

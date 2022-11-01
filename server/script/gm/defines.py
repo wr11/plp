@@ -4,3 +4,6 @@
 AUTH_OPENID = [
     "o79YJ5C8MzIMv3YHvqbt0ysmmwTI",     #程序   魏骅玮
 ]
+
+def IsAuth(sOpenID):
+    return sOpenID in AUTH_OPENID

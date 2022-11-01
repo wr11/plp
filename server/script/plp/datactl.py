@@ -30,6 +30,14 @@ class CDataCtl(CListContainer):
 		lstData = [dResult["data"] for dResult in ret]
 		raise Return(lstData)
 
+	@coroutine
+	def GetPlpCount(self):
+		ret = yield self.SelectSingleDataFromDB("COUNT(plpid)")
+		if not ret:
+			raise Return(0)
+		else:
+			raise Return(ret[0].get("COUNT(plpid)", 0))
+
 if "g_PlpDataCtl" not in globals():
 	g_PlpDataCtl = CDataCtl()
 
