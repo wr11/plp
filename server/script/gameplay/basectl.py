@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from mylog.logcmd import PrintDebug
-from timer import Call_out
-from myutil.mycorotine import coroutine, WaitMultiFuture
+from timer import Call_out, Remove_Call_out, GetTimer
+from myutil.mycorotine import Return, coroutine, WaitMultiFuture
 
 import conf
 import rpc
@@ -35,10 +34,10 @@ def Init():
 		if sGameName in lstName:
 			PrintWarning("Game Name %s Repeated!!"%sGameName)
 			continue
-		lstName.append(sGameName)
 		lstAttr = oGamectl.GetSaveAttrList(bList = True)
 		if not lstAttr:
 			continue
+		lstName.append(sGameName)
 		iServer, iIndex = conf.GetDBS()
 		oFuture = rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadGameShadow", sGameName, lstAttr)
 		lstFuture.append(oFuture)
@@ -49,6 +48,7 @@ def Init():
 			continue
 		oGameCtl.Load(lstData[iIndex])
 		oGameCtl.m_Loaded = True
+		oGameCtl.FillDefault()
 		oGamectl.AfterLoad()
 
 	Call_out(INTERVAL_SAVEGAME, "savegame", SaveGames)
@@ -65,11 +65,29 @@ def SaveGames():
 			continue
 		data[sGameName] = dGameData
 		if hasattr(oGameCtl, "OnSave"):
-			func = oGameCtl.OnSave
-			func()
+			oGameCtl.OnSave()
 	iServer, iIndex = conf.GetDBS()
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.UpdateGameShadowData", data)
 	Call_out(INTERVAL_SAVEGAME, "savegame", SaveGames)
+
+@coroutine
+def ShutDown():
+	global g_GameList
+	if GetTimer("savegame"):
+		Remove_Call_out("savegame")
+	data = {}
+	for sGameName, oGameCtl in g_GameList.items():
+		if not getattr(oGameCtl, "m_Loaded", 0):
+			continue
+		dGameData = oGameCtl.Save()
+		if not dGameData:
+			continue
+		data[sGameName] = dGameData
+	if not data:
+		raise Return(1)
+	iServer, iIndex = conf.GetDBS()
+	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.UpdateGameShadowData", data)
+	raise Return(ret)
 
 class CGameCtl:
 	def __init__(self):
@@ -92,8 +110,11 @@ class CGameCtl:
 	def Init(self):
 		pass
 
-	def AfterLoad(self):
+	def FillDefault(self):
 		# 用于填充默认值，否则Load后默认为None
+		pass
+
+	def AfterLoad(self):
 		pass
 
 	def Save(self):

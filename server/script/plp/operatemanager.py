@@ -58,6 +58,7 @@ class CPlpOeration:
 		return True
 
 	def ValidGetPlp(self, who_proxy):
+		return 1
 		iCnt = who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)
 		if iCnt >= GETCNT_DAY:
 			OpenTips(who_proxy.m_OpenID, 1, "", "none", "每天最浏览%s个"%GETCNT_DAY)
@@ -89,6 +90,8 @@ class CPlpOeration:
 		if iMinID == 0:
 			return
 		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, 5)
+		lstNewSend = list(set(lstPlpID) | set(lstSended))
+		setattr(who_proxy, "m_SendedToClient", lstNewSend)
 		lstPlpData = yield self.m_DataCtl.GetMultiPlpData(lstPlpID)
 		PrintDebug("----",lstPlpData)
 		if not pubdefines.IsProxyExist(who_proxy):
@@ -100,6 +103,7 @@ class CPlpOeration:
 
 	def GetPlpIDList(self, iWay, lstSended, iMaxID, iMinID, iCount):
 		#待优化，iCount很多时会占很大内存
+		PrintDebug("GetPlpIDList", iWay, lstSended, iMaxID, iMinID, iCount)
 		if iWay == 1:
 			setAll = set(range(iMinID, iMaxID+1))
 			setSended = set(lstSended)

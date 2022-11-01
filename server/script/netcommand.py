@@ -8,7 +8,7 @@ import script.login.login as login
 import netpackage as np
 import conf
 import script.player as player
-import script.gm as gm
+import script.gm.excutor as gm
 import script.common as common
 
 RPC_PROTOCOL = [SS_RPCRESPONSE, SS_RPCCALL, SS_RESPONSEERR]
@@ -137,3 +137,4 @@ def SendAppKey(iConnectID):
 def SetServerState(oResponse, iState):
 	global g_ServerState
 	g_ServerState = iState
+	oResponse(1)

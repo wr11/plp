@@ -41,6 +41,24 @@ def SaveListContainer():
 	rpc.RemoteCallFunc(iServer, iIndex, None, "datahub.manager.ListContainerSaveToDBS", data)
 	timer.Call_out(SAVE_LISTCONTAINER, "listcontainer_save", SaveListContainer)
 
+@coroutine
+def ShutDown():
+	global g_ListContainer
+	if timer.GetTimer("listcontainer_save"):
+		timer.Remove_Call_out("listcontainer_save")
+	data = {}
+	for sTypeName, oContainer in g_ListContainer.items():
+		lstData = oContainer.Save()
+		if not lstData:
+			continue
+		data[sTypeName] = lstData
+	if not data:
+		raise Return(1)
+	iServer, iIndex = conf.GetDBS()
+	ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.ListContainerSaveToDBS", data)
+	raise Return(ret)
+	
+
 class CListContainer(list):
 	"""
 	对应CDataTableShadow，一个CListContainer用来描述一个表，列表中的每个对象对应表中一行记录

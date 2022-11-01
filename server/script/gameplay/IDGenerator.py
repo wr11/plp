@@ -11,7 +11,7 @@ class CGameCtl(CCustomGameCtl):
 
 		self.m_IDList = {}
 
-	def AfterLoad(self):
+	def FillDefault(self):
 		if not self.m_IDList:
 			self.m_IDList = {}
 

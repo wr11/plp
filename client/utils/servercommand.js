@@ -29,6 +29,10 @@ export function execServerCommand(header, oNetPack){
     showModal(sDesc, sTitle, sContent, sConfirmText, sConfirmColor, bShowCancel, sCancelText, sCancelColor, bEditable, sPlaceholderText, bNeedCallBack)
     return
   }
+  if (header == PROTOCOL.S2C_OFFLINE){
+    clientOffline()
+    return
+  }
 }
 
 function showToast(sDesc, sIcon, sMsg, iDuration, bMask, bNeedCallBack){
@@ -79,4 +83,13 @@ function showModal(sDesc, sTitle, sContent, sConfirmText, sConfirmColor, bShowCa
       NetPack.PacketSend(oNetPack)
     },
   })
+}
+
+function clientOffline(){
+  let app = getApp()
+  if (!app.getConnectState()) {
+    return
+  }
+  let conn = app.getTcpConnect()
+  conn.close()
 }

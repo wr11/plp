@@ -40,6 +40,7 @@ def CheckRole(sOpenID, oPlayer_proxy):
 		if data and iCode == 10:
 			player.GetPlayer(sOpenID).Load(data)
 			player.GetPlayer(sOpenID).m_Loaded = True
+			player.GetPlayer(sOpenID).FillDefault()
 			player.GetPlayer(sOpenID).AfterLoad()
 	except Exception as e:
 		PrintError(e)

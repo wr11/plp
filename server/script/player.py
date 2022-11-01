@@ -4,7 +4,11 @@ from myutil.mycorotine import coroutine, Return
 from timer import Call_out, GetTimer, Remove_Call_out
 from gc import collect
 from pubdefines import GetPlayerProxy, IsProxyExist, GetNowTime, GetDay5Sec, GetDayNo, GetDay0Sec
+from netpackage import PacketPrepare, PacketSend
+from protocol import S2C_OFFLINE
+
 import rpc,conf
+import weakref
 
 INTERVAL_SAVEPLAYERS = 2
 
@@ -51,8 +55,8 @@ def TrueSavePlayer(lstPlayer):
 	Call_out(5, "truesaveplayer", TrueSavePlayer, lstPlayer)
 
 @coroutine
-def SaveOnePlayer(oPlayer_proxy):
-	if getattr(oPlayer_proxy, "m_Login", 0):
+def SaveOnePlayer(oPlayer_proxy, force = False):
+	if getattr(oPlayer_proxy, "m_Login", 0) and not force:
 		PrintWarning("player is in login, after 10s will offline again")
 		raise Return(0)
 	bFinish = False
@@ -71,6 +75,24 @@ def SaveOnePlayer(oPlayer_proxy):
 		raise Return(ret)
 	else:
 		raise Return(0)
+
+def KickoutPlayers(cb):
+	from script.gm.defines import AUTH_OPENID
+	lstPlayer = GetAllPlayers()
+	if not lstPlayer:
+		cb(1)
+		return
+	for oPlayer in lstPlayer:
+		if oPlayer.m_OpenID in AUTH_OPENID:
+			continue
+		SaveOnePlayer(weakref.proxy(oPlayer), force = True)
+		S2COffline(oPlayer.m_OpenID)
+	cb(1)
+
+def S2COffline(sOpenID):
+	oNetPack = PacketPrepare(S2C_OFFLINE)
+	PacketSend(sOpenID, oNetPack)
+
 
 # NOTE TODO: player中只加必要的接口和属性，尽量减少属性和方法数量，后期数量较多后会使用mixin提升效率并节省空间
 class CPlayer:
@@ -91,12 +113,12 @@ class CPlayer:
 		self.m_SendedAllNum = 0
 		self.m_SendedList = []
 		self.m_GetPlpWay = 1		#1-不获取重复的 2-获取重复的
-		self.m_TimeLimitData = {}		#限时数据，如 每日固定时间重置，或到某时间点过期的数据（惰性检查，取数据时候检查是否到期，所以访问数据需要使用接口，勿直接访问该数据结构）
+		self.m_TimeLimitData = {}		#限时数据，如 每日固定时间重置，或到某时间点过期的数据（惰性检查，取数据以及load之后检查是否到期，所以访问数据需要使用接口，勿直接访问该数据结构）
 
 	def __repr__(self):
 		return "<player(%s) %s %s>" % (self.m_ConnectID, self.m_OpenID, str(self.m_SaveState))
 
-	def AfterLoad(self):
+	def FillDefault(self):
 		# Load后没有数据的需要赋默认值，否则为None
 		if not self.m_SendedNum:
 			self.m_SendedNum = 0
@@ -108,6 +130,15 @@ class CPlayer:
 			self.m_GetPlpWay = 1
 		if not self.m_TimeLimitData:
 			self.m_TimeLimitData = {}
+
+	def AfterLoad(self):
+		import copy
+		dData = copy.deepcopy(self.m_TimeLimitData)
+		for key, tData in dData.items():
+			iExpireTime = tData[1]
+			if iExpireTime <= GetNowTime():
+				self.SetSaveState("m_TimeLimitData", True)
+				del self.m_TimeLimitData[key]
 
 	def GetSaveAttrList(self, bList = False):
 		if not bList:
@@ -243,6 +274,10 @@ def RemovePlayer(sOpenID, iConnectID):
 	global PLAYER_LIST, CONNECTID2OPENID
 	del PLAYER_LIST[sOpenID]
 	del CONNECTID2OPENID[iConnectID]
+
+def GetAllPlayers():
+	global PLAYER_LIST
+	return list(PLAYER_LIST.values())
 
 def GetOnlinePlayer(sOpenID):
 	global PLAYER_LIST
