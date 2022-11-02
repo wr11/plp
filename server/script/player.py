@@ -10,7 +10,7 @@ from protocol import S2C_OFFLINE
 import rpc,conf
 import weakref
 
-INTERVAL_SAVEPLAYERS = 2
+INTERVAL_SAVEPLAYERS = 2 * 24 * 3600
 
 if "PLAYER_LIST" not in globals():
 	PLAYER_LIST = {}
@@ -55,8 +55,8 @@ def TrueSavePlayer(lstPlayer):
 	Call_out(5, "truesaveplayer", TrueSavePlayer, lstPlayer)
 
 @coroutine
-def SaveOnePlayer(oPlayer_proxy, force = False):
-	if getattr(oPlayer_proxy, "m_Login", 0) and not force:
+def SaveOnePlayer(oPlayer_proxy):
+	if not getattr(oPlayer_proxy, "m_Loaded", 0):
 		PrintWarning("player is in login, after 10s will offline again")
 		raise Return(0)
 	bFinish = False
@@ -76,6 +76,7 @@ def SaveOnePlayer(oPlayer_proxy, force = False):
 	else:
 		raise Return(0)
 
+@coroutine
 def KickoutPlayers(cb):
 	from script.gm.defines import IsAuth
 	lstPlayer = GetAllPlayers()
@@ -83,10 +84,11 @@ def KickoutPlayers(cb):
 		cb(1)
 		return
 	for oPlayer in lstPlayer:
-		if IsAuth(oPlayer.m_OpenID):
-			continue
-		SaveOnePlayer(weakref.proxy(oPlayer), force = True)
-		S2COffline(oPlayer.m_OpenID)
+		ret = yield SaveOnePlayer(weakref.proxy(oPlayer))
+		if not ret:
+			PrintError("%s shutdow save failed"%oPlayer.m_OpenID)
+		if not IsAuth(oPlayer.m_OpenID):
+			S2COffline(oPlayer.m_OpenID)
 	cb(1)
 
 def S2COffline(sOpenID):
@@ -162,8 +164,9 @@ class CPlayer:
 			return data
 		for sAttr in lstAttr:
 			if self.GetAttrNeedSave(sAttr):
-				self.SetSaveState(sAttr, False)
 				data[sAttr] = getattr(self, sAttr, None)
+		for sAttr in lstAttr:
+			self.SetSaveState(sAttr, False)
 		return data
 
 	def Load(self, data):

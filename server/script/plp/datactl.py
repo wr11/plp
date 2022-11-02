@@ -25,10 +25,7 @@ class CDataCtl(CListContainer):
 		if not lstPlpID:
 			raise Return([])
 		ret = yield self.SelectMultiDataFromDB("*", lstPlpID)
-		if not ret:
-			raise Return([])
-		lstData = [dResult["data"] for dResult in ret]
-		raise Return(lstData)
+		raise Return(ret)
 
 	@coroutine
 	def GetPlpCount(self):

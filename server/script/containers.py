@@ -6,7 +6,7 @@ import timer
 import rpc
 import conf
 
-SAVE_LISTCONTAINER = 4
+SAVE_LISTCONTAINER = 4 * 24 * 3600
 
 #List Container
 if "g_ListContainer" not in globals():
@@ -33,7 +33,6 @@ def SaveListContainer():
 		if not lstData:
 			continue
 		data[sTypeName] = lstData
-	# PrintDebug("======", data)
 	if not data:
 		timer.Call_out(SAVE_LISTCONTAINER, "listcontainer_save", SaveListContainer)
 		return
@@ -129,4 +128,10 @@ class CListContainer(list):
 				data[i] = self.GetItem(i)
 		iServer, iIndex = conf.GetDBS()
 		ret = yield rpc.AsyncRemoteCallFunc(iServer, iIndex, "datahub.manager.LoadMultiDataFromTableShadow", self.m_TypeName, sSelectType, lstNewPrimaryData)
-		raise Return(ret)
+
+		lstRet = []
+		for _, oData in data.items():
+			lstRet.append(oData.Save())
+		for dResult in ret:
+			lstRet.append(dResult["data"])
+		raise Return(lstRet)

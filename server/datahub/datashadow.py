@@ -97,7 +97,6 @@ class CDataShadow(CMysqlBase):
 
 	def UpdateDataBase(self):
 		data = self.Save()
-		PrintDebug("UpdateDataBase", data)
 		bData = packb(data)
 		self.Handler(MYSQL_UPDATE, bData, self.m_PrimaryData)
 

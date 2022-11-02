@@ -6,7 +6,7 @@ from myutil.mycorotine import Return, coroutine, WaitMultiFuture
 import conf
 import rpc
 
-INTERVAL_SAVEGAME = 6
+INTERVAL_SAVEGAME = 6 * 24 * 3600
 
 if "g_GameList" not in globals():
 	g_GameList = {}

@@ -88,7 +88,9 @@ class CPlpOeration:
 		iMinID = yield self.m_DataCtl.GetMinID()
 		if iMinID == 0:
 			return
-		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, 5)
+		iCnt = max(0, (GETCNT_DAY-who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)))
+		iTrueCnt = min(iCnt, 5)
+		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, iTrueCnt)
 		lstNewSend = list(set(lstPlpID) | set(lstSended))
 		setattr(who_proxy, "m_SendedToClient", lstNewSend)
 		lstPlpData = yield self.m_DataCtl.GetMultiPlpData(lstPlpID)
@@ -102,7 +104,6 @@ class CPlpOeration:
 
 	def GetPlpIDList(self, iWay, lstSended, iMaxID, iMinID, iCount):
 		#待优化，iCount很多时会占很大内存
-		PrintDebug("GetPlpIDList", iWay, lstSended, iMaxID, iMinID, iCount)
 		if iWay == 1:
 			setAll = set(range(iMinID, iMaxID+1))
 			setSended = set(lstSended)

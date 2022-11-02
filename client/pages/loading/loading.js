@@ -254,6 +254,9 @@ Page({
       })
       return
     }
+    let bAuth = NetPack.UnpackBool(oNetPack)
+    console.log("auth ------------", bAuth)
+    app.globalData.auth = true
     this.updateProgress(100)
   },
 

@@ -309,7 +309,6 @@ def Receive(iHeader, data):
 	oBuffer = BytesIO(data)
 	unpacker = msgpack.Unpacker(oBuffer, raw=False)
 	lstInfo = [unpacked for unpacked in unpacker]
-	# PrintNotify("rpc remote receive %s"%str(lstInfo))
 	if iHeader == SS_RPCCALL:
 		oResponse = CRPCResponse(lstInfo)
 		oResponse.RemoteExcute()

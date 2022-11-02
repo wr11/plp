@@ -21,7 +21,7 @@ GPS_PROTOCOL_COMMAND = {
 }
 
 if "g_ServerState" not in globals():
-	g_ServerState = 0		#0-不允许登录, 1-允许登录
+	g_ServerState = 0		#0-不允许登录, 1-允许权限账号登录, 2-允许全部账号登录
 
 def MQMessage(tData):
 	iMQProto, data = tData
@@ -39,7 +39,6 @@ def OnOtherMessage(data):
 	pass
 
 def ParseMQMessage(iMQHeader, data):
-	global g_ServerState
 	if iMQHeader == MQ_LOCALMAKEROUTE:
 		sHost, iPort, iServer, iIndex = data
 		CallManagerFunc("link", "AddLink", sHost, iPort, iServer, iIndex)
@@ -56,9 +55,8 @@ def ParseMQMessage(iMQHeader, data):
 		import conf
 		iConnectID = data[0]
 		CallManagerFunc("link", "DelClientLink", iConnectID)
-		if g_ServerState:
-			iServer, iIndex = conf.GetGPS()
-			rpc.RemoteCallFunc(iServer, iIndex, None, "script.player.PlayerOffLine", iConnectID)
+		iServer, iIndex = conf.GetGPS()
+		rpc.RemoteCallFunc(iServer, iIndex, None, "script.player.PlayerOffLine", iConnectID)
 	elif iMQHeader == MQ_DATARECEIVED:
 		OnNetCommand(data)
 
@@ -94,7 +92,8 @@ def GPSNetCommand(oResPonse, iConnectID, data):
 	oNetPackage = np.UnpackPrepare(data)
 	iDataHeader = np.UnpackInt16(oNetPackage)
 	if iDataHeader == CS_LOGIN:
-		login.Login(iConnectID, oNetPackage)
+		sOpenID = np.UnpackS(oNetPackage)
+		login.Login(iConnectID, sOpenID)
 		return
 
 	sOpenid = player.GetOpenIDByConnectID(iConnectID)
@@ -135,6 +134,17 @@ def SendAppKey(iConnectID):
 	np.PacketSend(iConnectID, oNetPack)
 
 def SetServerState(oResponse, iState):
+	"""
+	在GATE执行
+	"""
 	global g_ServerState
+	PrintNotify("GATE set server state: %s"%iState)
 	g_ServerState = iState
 	oResponse(1)
+
+def GetServerState(oResponse):
+	"""
+	在GATE执行
+	"""
+	global g_ServerState
+	oResponse(g_ServerState)

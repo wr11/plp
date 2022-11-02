@@ -55,14 +55,21 @@ def CreateNewGameShadow(oShadow):
 	oShadow.SaveToDataBase()
 
 def UpdateGameShadowData(oResponse, data):
-	for sGameName, dData in data.items():
-		if not dData:
-			continue
-		oShadow = shadow.GetGameShadowByGameName(sGameName)
-		if not oShadow:
-			oShadow = shadow.CreateGameShadow(sGameName)
-		oShadow.Update(dData)
-	oResponse(1)
+	PrintDebug("UpdateGameShadowData",data)
+	iRet = 0
+	try:
+		for sGameName, dData in data.items():
+			if not dData:
+				continue
+			oShadow = shadow.GetGameShadowByGameName(sGameName)
+			if not oShadow:
+				oShadow = shadow.CreateGameShadow(sGameName)
+			oShadow.Update(dData)
+		iRet = 1
+	except Exception as e:
+		PrintError(e)
+		iRet = 0
+	oResponse(iRet)
 
 #listcontainer shadow
 def ListContainerSaveToDBS(oResponse, data):

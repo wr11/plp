@@ -3,13 +3,22 @@
 from protocol import CS_LOGIN
 from myutil.mycorotine import coroutine, Return
 from pubdefines import GetPlayerProxy, IsProxyExist
+from script.gameinit import GetServerState
 
 import netpackage as np
 import script.player as player
 
 @coroutine
-def Login(iConnectID, oNetPackage):
-	sOpenID = np.UnpackS(oNetPackage)
+def Login(iConnectID, sOpenID):
+	from script.gm.defines import IsAuth
+	iServerState = yield GetServerState()
+	if iServerState == 0:
+		S2CLoginFailed(iConnectID, 18)
+		return
+	elif iServerState == 1:
+		if not IsAuth(sOpenID):
+			S2CLoginFailed(iConnectID, 17)
+			return
 	iRet = player.MakePlayer(sOpenID, iConnectID)
 	if iRet > 10:
 		S2CLoginFailed(iConnectID, iRet)
@@ -26,7 +35,11 @@ def Login(iConnectID, oNetPackage):
 	PrintNotify("%s login success"%sOpenID)
 	if IsProxyExist(oPlayer_proxy):
 		oPlayer_proxy.m_Login = 0
-	S2CLoginSuccess(sOpenID)
+	
+	bAuth = False
+	if IsAuth(sOpenID):
+		bAuth = True
+	S2CLoginSuccess(sOpenID, bAuth)
 
 @coroutine
 def CheckRole(sOpenID, oPlayer_proxy):
@@ -52,7 +65,8 @@ def S2CLoginFailed(iConnectID, iRet):
 	np.PacketAddInt8(iRet, oNetPack)
 	np.GPSPacketSendByConnectID(iConnectID, oNetPack)
 
-def S2CLoginSuccess(sOpenID):
+def S2CLoginSuccess(sOpenID, bAuth):
 	oNetPack = np.PacketPrepare(CS_LOGIN)
 	np.PacketAddInt8(1, oNetPack)
+	np.PacketAddBool(bAuth, oNetPack)
 	np.PacketSend(sOpenID, oNetPack)

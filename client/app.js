@@ -31,7 +31,8 @@ App({
   globalData:{
     userinfo : null,
     tcpconn : null,
-    connectstate : false
+    connectstate : false,
+    auth : false
   },
 
   getTcpConnect: function(){

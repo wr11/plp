@@ -10,7 +10,7 @@ import conf
 
 def ExecGMOrder(who, oNetPackage):
 	sOpenID = who.m_OpenID
-	if IsAuth(sOpenID):
+	if not IsAuth(sOpenID):
 		OpenTips(who.m_OpenID, 1, "", "none", "当前账号无GM权限")
 		return
 	sOrder = np.UnpackS(oNetPackage)
@@ -95,6 +95,14 @@ def GMExample(who, iVal, sVal, bVal, dVal, lstVal, tVal, setVal):
 	PrintDebug("args test val", iVal, sVal, bVal, dVal, lstVal, tVal, setVal)
 	PrintDebug("args test type", type(iVal), type(sVal), type(bVal), type(dVal), type(lstVal), type(tVal), type(setVal))
 
+def GMSetServerState(who, iState):
+	"""
+	0-禁止登录 1-允许权限账号登录 2-允许所有账号登录
+	"""
+	from rpc import RemoteCallFunc
+	iServer, iIndex = conf.GetGate()
+	RemoteCallFunc(iServer, iIndex, None, "script.netcommand.SetServerState", iState)
+
 def GMSendMsg2All(who, sMsg, iType):
 	from script.player import GetAllPlayers
 	lstPlayers = GetAllPlayers()
@@ -140,7 +148,7 @@ def GMTrueShutDownStep():
 	PrintNotify("GM ShutDown Sever Begin!")
 	PrintNotify("shutdown step1: set server state 0")
 	iServer, iIndex = conf.GetGate()
-	ret = yield AsyncRemoteCallFunc(iServer, iIndex, "script.netcommand.SetServerState", 0)
+	ret = yield AsyncRemoteCallFunc(iServer, iIndex, "script.netcommand.SetServerState", 1)
 	if not ret:
 		PrintNotify("shutdown error: set server state failed, please try again")
 		return
@@ -180,7 +188,7 @@ def GMGetPlayerInfo(who):
 		PrintDebug("%s : %s"%(sAttr, getattr(who, sAttr, None)))
 
 def GMPublishPlp(who):
-	CallManagerFunc("plp", "PublishPlp", who, {"content":"今天很开心5", "password":"123456", "location":"china"})
+	CallManagerFunc("plp", "PublishPlp", who, {"content":"今天很开心3", "password":"123456", "location":"china"})
 
 def GMGet5Plp(who):
 	PrintDebug("getway: %s, sended: %s"%(who.m_GetPlpWay, str(getattr(who, "m_SendedToClient", []))))
@@ -221,6 +229,7 @@ def GMGetPlpCount(who):
 
 ORDER = {
 	"GMExample" : (GMExample, "isbdlte"),
+	"SetServerState" : (GMSetServerState, "i"),
 	"SendMsg2All" : (GMSendMsg2All, "si"),
 	"KickoutOnePlayer" : (GMKickoutOnePlayer, "s"),
 	"ShutDown" : (GMShutDown, ""),
@@ -233,9 +242,9 @@ ORDER = {
 	"ResetPlpSendedCache" : (GMResetPlpSendedCache, ""),
 	"SetGetPlpWay" : (GMSetGetPlpWay, "i"),
 	"GetPlayerInfo" : (GMGetPlayerInfo, ""),
-	"PublisePlp" : (GMPublishPlp, ""),
+	"PublishPlp" : (GMPublishPlp, ""),
 	"Get5Plp" : (GMGet5Plp, ""),
-	"LookIIDList" : (GMLookIDList, ""),
+	"LookIDList" : (GMLookIDList, ""),
 	"GetPlpCount" : (GMGetPlpCount, ""),
 }
 
