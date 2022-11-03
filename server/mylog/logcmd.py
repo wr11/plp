@@ -40,7 +40,7 @@ def Init(sThread):
 
 	init(autoreset=True)
 
-	PrintNotify("Logger inited")
+	PrintNotify("Logger Cmd inited")
 
 def GetCommonLogHeader(iType):
 	global LOCAL_FLAG, LOCAL_THREAD
