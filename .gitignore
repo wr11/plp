@@ -3,5 +3,5 @@ __pycache__/
 
 .vscode
 
-/log/serverlog/*.log
-clientlog/*.log
+/log/serverlog/
+/log/clientlog/
