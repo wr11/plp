@@ -67,8 +67,7 @@ class CLogFileManager:
 					try:
 						sFilePath = "%s\%s\%s.log"%(LOG_FILE_ROOT_PATH, sDir, sFile)
 						with open(sFilePath, "a") as f:
-							sMsg = "%s%s\n"%(GetCommonLogHeader(sDir), sMsg)
-							f.write(sMsg)
+							f.write("%s\n"%sMsg)
 					except Exception as e:
 						PrintError("logfile %s %s %s error"%(sDir, sFile, sMsg), e)
 						continue
@@ -131,22 +130,27 @@ def LogFileDebug(sFile, sMsg):
 	global g_LogFileManager
 	if not conf.IsDebug():
 		return
-	g_LogFileManager.AddLog(DEBUG_DIR, sFile, sMsg)
+	sCommonHeader = GetCommonLogHeader(DEBUG_DIR)
+	g_LogFileManager.AddLog(DEBUG_DIR, sFile, sCommonHeader + sMsg)
 
 def LogFileWarning(sFile, sMsg):
 	global g_LogFileManager
-	g_LogFileManager.AddLog(WARNING_DIR, sFile, sMsg)
+	sCommonHeader = GetCommonLogHeader(WARNING_DIR)
+	g_LogFileManager.AddLog(WARNING_DIR, sFile, sCommonHeader + sMsg)
 
 def LogFileError(sFile, sMsg):
 	global g_LogFileManager
-	g_LogFileManager.AddLog(ERROR_DIR, sFile, sMsg)
+	sCommonHeader = GetCommonLogHeader(ERROR_DIR)
+	g_LogFileManager.AddLog(ERROR_DIR, sFile, sCommonHeader + sMsg)
 
 def LogFileStack(sFile, sMsg):
 	global g_LogFileManager
 	if not conf.IsDebug():
 		return
-	g_LogFileManager.AddLog(STACK_DIR, sFile, sMsg)
+	sCommonHeader = GetCommonLogHeader(STACK_DIR)
+	g_LogFileManager.AddLog(STACK_DIR, sFile, sCommonHeader + sMsg)
 
 def LogFileNotify(sFile, sMsg):
 	global g_LogFileManager
-	g_LogFileManager.AddLog(NOTIFY_DIR, sFile, sMsg)
+	sCommonHeader = GetCommonLogHeader(NOTIFY_DIR)
+	g_LogFileManager.AddLog(NOTIFY_DIR, sFile, sCommonHeader + sMsg)
