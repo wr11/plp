@@ -20,6 +20,7 @@ def Init():
 		SetServerState(1)
 
 		PrintNotify("server start finish !")
+		LogFileNotify("server", "server start finish!")
 
 def SetServerState(iState):
 	iServer, iIndex = conf.GetGate()
