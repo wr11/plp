@@ -10,6 +10,7 @@ import conf
 import script.player as player
 import script.gm.excutor as gm
 import script.common as common
+import script.plp.netcommand as plp
 
 RPC_PROTOCOL = [SS_RPCRESPONSE, SS_RPCCALL, SS_RESPONSEERR]
 
@@ -17,6 +18,7 @@ GPS_PROTOCOL_COMMAND = {
 	C2S_GMORDER: gm.ExecGMOrder,
 	C2S_TOASTCB: common.TipAnswer,
 	C2S_MODALCB: common.TipAnswer,
+	CS_GETPZ: plp.Test,
 
 }
 
