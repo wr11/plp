@@ -280,6 +280,30 @@ Page({
     })
   },
 
+  GetAPZ(){
+    console.log("===get a pz")
+    let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_GETPZ, this.GetPZ)
+    NetPack.PacketAddInt8(12, oNetPack)
+    NetPack.PacketAddS("111", oNetPack)
+    NetPack.PacketSend(oNetPack)
+  },
+
+  GetPZ(state, oNetPack){
+    if (state == -1){
+      console.log("fail")
+      return
+    }
+    let len = NetPack.UnpackInt8(oNetPack)
+    let dict = {}
+    for (let i=0; i<len; i++)
+    {
+      let key = NetPack.UnpackString(oNetPack)
+      let value = NetPack.UnpackString(oNetPack)
+      dict[key] = value
+    }
+    console.log("=====dict", dict)
+  },
+
   openGM(){
     wx.navigateTo({
       url: '../gm/gm',

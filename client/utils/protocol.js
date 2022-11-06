@@ -9,4 +9,6 @@ export const PROTOCOL = {
   S2C_SHOWMODAL : 0x1006,
   C2S_MODALCB : 0x1007,
   S2C_OFFLINE : 0x1008,
+
+  CS_GETPZ: 0x1009,
 }
