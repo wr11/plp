@@ -5,9 +5,9 @@ import {NetPack} from 'netpackage.js'
 
 export function execServerCommand(header, oNetPack){
   if (header == PROTOCOL.S2C_SHOWTOAST){
-    let sDesc = NetPack.UnpackString(oNetPack)
-    let sIcon = NetPack.UnpackString(oNetPack)
-    let sMsg = NetPack.UnpackString(oNetPack)
+    let sDesc = NetPack.UnpackS(oNetPack)
+    let sIcon = NetPack.UnpackS(oNetPack)
+    let sMsg = NetPack.UnpackS(oNetPack)
     let iDuration = NetPack.UnpackInt16(oNetPack)
     let bMask = NetPack.UnpackBool(oNetPack)
     let bNeedCallBack = NetPack.UnpackBool(oNetPack)
@@ -15,16 +15,16 @@ export function execServerCommand(header, oNetPack){
     return
   }
   if (header == PROTOCOL.S2C_SHOWMODAL){
-    let sDesc = NetPack.UnpackString(oNetPack)
-    let sTitle = NetPack.UnpackString(oNetPack)
-    let sContent = NetPack.UnpackString(oNetPack)
-    let sConfirmText = NetPack.UnpackString(oNetPack)
-    let sConfirmColor = NetPack.UnpackString(oNetPack)
+    let sDesc = NetPack.UnpackS(oNetPack)
+    let sTitle = NetPack.UnpackS(oNetPack)
+    let sContent = NetPack.UnpackS(oNetPack)
+    let sConfirmText = NetPack.UnpackS(oNetPack)
+    let sConfirmColor = NetPack.UnpackS(oNetPack)
     let bShowCancel = NetPack.UnpackBool(oNetPack)
-    let sCancelText = NetPack.UnpackString(oNetPack)
-    let sCancelColor = NetPack.UnpackString(oNetPack)
+    let sCancelText = NetPack.UnpackS(oNetPack)
+    let sCancelColor = NetPack.UnpackS(oNetPack)
     let bEditable = NetPack.UnpackBool(oNetPack)
-    let sPlaceholderText = NetPack.UnpackString(oNetPack)
+    let sPlaceholderText = NetPack.UnpackS(oNetPack)
     let bNeedCallBack = NetPack.UnpackBool(oNetPack)
     showModal(sDesc, sTitle, sContent, sConfirmText, sConfirmColor, bShowCancel, sCancelText, sCancelColor, bEditable, sPlaceholderText, bNeedCallBack)
     return

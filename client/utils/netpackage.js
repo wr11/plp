@@ -71,13 +71,13 @@ class CNetPackage{
         this.m_Offset += 4
         return data3
       case "S":
-        let data4 = this.UnpackString(iStrLen)
+        let data4 = this.UnpackS(iStrLen)
         this.m_Offset += iStrLen
         return data4
     }
   }
 
-  UnpackString(iStrLen){
+  UnpackS(iStrLen){
     return STRING_ARRAYBUFFER.dataview2string(this.m_DataView, this.m_Offset, iStrLen)
   }
 }
@@ -198,7 +198,7 @@ export const NetPack = {
     return bVal
   },
 
-  UnpackString: function UnpackString(oNetPack){
+  UnpackS: function UnpackS(oNetPack){
     let iLen = this.UnpackInt(oNetPack)
     return oNetPack.Unpack("S", iLen)
   }

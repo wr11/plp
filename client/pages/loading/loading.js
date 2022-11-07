@@ -182,8 +182,8 @@ Page({
       return
     }
     let that = this
-    let appID = NetPack.UnpackString(oNetPack)
-    let secretKey = NetPack.UnpackString(oNetPack)
+    let appID = NetPack.UnpackS(oNetPack)
+    let secretKey = NetPack.UnpackS(oNetPack)
     wx.request({
       url: "https://api.weixin.qq.com/sns/jscode2session?appid=" + appID + "&secret=" + secretKey + "&js_code=" + this.data.wxlogincode + "&grant_type=authorization_code",
       success: function(result){
@@ -297,8 +297,8 @@ Page({
     let dict = {}
     for (let i=0; i<len; i++)
     {
-      let key = NetPack.UnpackString(oNetPack)
-      let value = NetPack.UnpackString(oNetPack)
+      let key = NetPack.UnpackS(oNetPack)
+      let value = NetPack.UnpackS(oNetPack)
       dict[key] = value
     }
     console.log("=====dict", dict)
