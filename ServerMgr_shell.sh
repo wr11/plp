@@ -1,3 +1,15 @@
+fun_help() {
+cat <<EOF
+Usage:
+    $0 init                       # 初始化服务器配置
+    $0 start                      # 启动所有服务进程
+    $0 shutdown                   # 关闭所有服务进程
+    $0 status                     # 查看所有服务状态
+    $0 log                        # 查看所有服务日志
+    $0 kill                       # 强制杀掉所有进程
+EOF
+}
+
 case $# in
     1)
         case $1 in
