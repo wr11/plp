@@ -24,7 +24,12 @@ if "LOCAL_THREAD" not in globals():
 if "LOCAL_FLAG" not in globals():
 	LOCAL_FLAG = ""
 
-LOG_FILE_ROOT_PATH = "log\serverlog"
+if os.name == "nt":
+	DELIMITER = "\\"
+else:
+	DELIMITER = "/"
+
+LOG_FILE_ROOT_PATH = "log%sserverlog"%(DELIMITER)
 DEBUG_DIR = "debug"
 WARNING_DIR = "warring"
 ERROR_DIR = "error"
@@ -65,7 +70,7 @@ class CLogFileManager:
 			for sFile, lstMsg in dData.items():
 				for sMsg in lstMsg:
 					try:
-						sFilePath = "%s\%s\%s.log"%(LOG_FILE_ROOT_PATH, sDir, sFile)
+						sFilePath = "%s%s%s%s%s.log"%(LOG_FILE_ROOT_PATH, DELIMITER, sDir, DELIMITER, sFile)
 						with open(sFilePath, "a") as f:
 							f.write("%s\n"%sMsg)
 					except Exception as e:
@@ -107,10 +112,10 @@ def Init(sThread):
 def InitLogFilePath():
 	global LOG_FILE_ROOT_PATH
 	sCurPath = os.getcwd()
-	sLogFilePath = "%s\%s"%(sCurPath, LOG_FILE_ROOT_PATH)
+	sLogFilePath = "%s%s%s"%(sCurPath, DELIMITER, LOG_FILE_ROOT_PATH)
 	lstPath = [DEBUG_DIR, WARNING_DIR, ERROR_DIR, STACK_DIR, NOTIFY_DIR]
 	for sDirName in lstPath:
-		sPath = "%s\%s"%(sLogFilePath, sDirName)
+		sPath = "%s%s%s"%(sLogFilePath, DELIMITER, sDirName)
 		if not os.path.exists(sPath):
 			os.makedirs(sPath)
 

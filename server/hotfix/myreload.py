@@ -4,8 +4,14 @@ from pubdefines import SERVER_DIR_ROOT
 
 import conf
 import timer
+import os
 
 IGNORE_LIST = ["doc", "allocate",]
+
+if os.name == "nt":
+	DELIMITER = "\\"
+else:
+	DELIMITER = "/"
 
 def Init():
 	if not conf.IsDebug() or not conf.IsAutoReloadOpen():
@@ -47,7 +53,7 @@ def MyAutoReload():
 def LookFile(bReload = False, bNotifyNew = False):
 	import os
 	sCurPath = os.getcwd()
-	sCurPath = "%s\%s"%(sCurPath, SERVER_DIR_ROOT)
+	sCurPath = "%s%s%s"%(sCurPath, DELIMITER, SERVER_DIR_ROOT)
 	lstFile = os.listdir(sCurPath)
 	for sName in lstFile:
 		if sName in IGNORE_LIST:
@@ -66,7 +72,7 @@ def ReloadPyFile(sCurPath, sName, bReload, bNotifyNew):
 			if not sPath:
 				lstPath = []
 			else:
-				lstPath = sPath.split("\\")
+				lstPath = sPath.split(DELIMITER)
 			if sMod not in  ("__init__",):
 				lstPath.append(sMod)
 			sModName = ".".join(lstPath)
@@ -85,7 +91,7 @@ def ReloadPyFile(sCurPath, sName, bReload, bNotifyNew):
 					PrintError(obj, e)
 	elif "." not in sName:
 		import os
-		sCurPath = sCurPath + "\%s"%sName
+		sCurPath = sCurPath + "%s%s"%(DELIMITER, sName)
 		sys.path.append(sCurPath)
 		lstFile = os.listdir(sCurPath)
 		for sFile in lstFile:

@@ -3,7 +3,6 @@
 服务器配置文件
 '''
 
-from tkinter.font import NORMAL
 from myutil.cachelib.cachefunc import CacheResult
 
 GATE	=	1<<0		#网关
@@ -379,3 +378,54 @@ def GetConnects():
 					break
 
 	return lstResult
+
+
+# linux 与 python 通信的函数，用于获取服务器配置等
+def LinuxGetServerConf():
+	lstProcessFlag = []
+	for dServer in SERVER_ALLOCATE:
+		if not dServer:
+			continue
+		lstProcess = dServer["lstProcessConfig"]
+		for dConfig in lstProcess:
+			iIndex = dConfig["iIndex"]
+			lstProcessFlag.append(str(iIndex))
+	sReult = ",".join(lstProcessFlag)
+	print(sReult)
+
+def LinuxGetServerType():
+	import sys
+	iServer = int(sys.argv[2])
+	iIndex = int(sys.argv[3])
+	sResult = ""
+	for dServer in SERVER_ALLOCATE:
+		if not dServer:
+			continue
+		if iServer != dServer["iServerID"]:
+			continue
+		lstProcess = dServer["lstProcessConfig"]
+		for dConfig in lstProcess:
+			if iIndex != dConfig["iIndex"]:
+				continue
+			iType = dConfig["iType"]
+			sTypeName = TYPE2NAME[iType]
+			sResult = sTypeName.lower()
+			break
+		break
+	print(sResult)
+
+
+if __name__ == "__main__":
+	"""
+	用于linux端获取服务器配置等(交互序号按顺序后移即可)
+	1: 获取需要启动的服务器的服务器编号和进程索引
+	2: 通过服务器编号和进程索引获取改服务器进程的类型名称
+	"""
+	import os
+	import sys
+	if os.name != "nt":
+		args = sys.argv[1]
+		if args == "1":
+			LinuxGetServerConf()
+		if args == "2":
+			LinuxGetServerType()
