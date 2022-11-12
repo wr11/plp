@@ -137,6 +137,8 @@ fun_start_single() {
 fun_status_all(){
 	echo "status all"
 	echo "waiting for support"
+	ps -aux | grep python3.11| awk '{print $14}'
+	ps -aux | grep python3.11| awk '{print $15}'
 }
 
 fun_status_single(){
