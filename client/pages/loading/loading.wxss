@@ -1,8 +1,28 @@
 /* pages/loading/loading.wxss */
-.botton{
+.gmtext{
   background-color: #3ba3ed;
-  border-radius: 80rpx;
+  height: 70rpx;
+  width: 50rpx;
+  border-radius: 90rpx;
   border: 4rpx solid rgb(1, 5, 15);
-  align-self: center;
-  margin-top: 30rpx;
+  align-content: center;
+}
+
+.movable-area{
+  pointer-events:none;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.movable-view{ 
+  pointer-events:auto;
+  height: 70rpx;
+  width: 70rpx;
+  background: rgba(255, 0, 0, 0);
+  border-radius: 90rpx;
 }

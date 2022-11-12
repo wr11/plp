@@ -107,8 +107,21 @@ fun_start_all() {
 fun_start_single() {
 	serverNum=$1
 	index=$2
-	echo "${serverNum} ${index} start begin"
-	echo "waiting for support"
+	server_type=`${python_version} -B server/conf.py 2 ${SERVER_NUM} ${index}`
+	if [ -z "${server_type}" ]
+	then
+		echo "error: cannot match type with server ${SERVER_NUM}, ${index}"
+		exit
+	else
+		log_name="${server_type}.log"
+		if [ -f ${log_name} ]
+		then
+			rm ${log_name}
+		fi
+		echo "starting ${SERVER_NUM} ${index} > log in ${log_name}"
+		nohup ${python_version} -B server/main.py ${SERVER_NUM} ${index} > ${log_name} 2>&1 &
+	fi
+	echo "server ${SERVER_NUM} ${index} start finish!!!"
 }
 
 fun_status_all(){

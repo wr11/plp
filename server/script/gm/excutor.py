@@ -145,10 +145,11 @@ def GMTrueShutDownStep():
 	import script.player as player
 	import script.gameplay as gameplay
 	import script.containers as containers
+	import mylog.logfile as logfile
 	PrintNotify("GM ShutDown Sever Begin!")
 	PrintNotify("shutdown step1: set server state 0")
 	iServer, iIndex = conf.GetGate()
-	ret = yield AsyncRemoteCallFunc(iServer, iIndex, "script.netcommand.SetServerState", 1)
+	ret = yield AsyncRemoteCallFunc(iServer, iIndex, "script.netcommand.SetServerState", 0)
 	if not ret:
 		PrintNotify("shutdown error: set server state failed, please try again")
 		return
@@ -169,6 +170,8 @@ def GMTrueShutDownStep():
 	if not ret:
 		PrintNotify("shutdown error: containers shutdown failed, please try again")
 		return
+	PrintNotify("shutdown step5 logfile shutdown")
+	logfile.ShutDown()
 	PrintNotify("shutdown step finish! you can now close the process")
 
 def GMLookGameCtl(who):

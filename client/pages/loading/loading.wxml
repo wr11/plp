@@ -4,5 +4,10 @@
   active active-mode="forwards" stroke-width="8" border-radius="30" duration = "5"
   bindactiveend="finishLoad"
 />
-<button class='botton' type='primary' bindtap='openGM' >GM界面</button>
 <button bindtap="GetAPZ">get a pz</button>
+
+<movable-area class="movable-area">
+    <movable-view class="movable-view" direction="all">
+      <text class='gmtext' bindtap='openGM' >GM</text>
+    </movable-view>
+</movable-area>
