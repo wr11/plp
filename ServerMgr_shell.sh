@@ -5,10 +5,9 @@ SERVER_NUM=1000
 cmd_install="apt-get install"
 python_version="python3.11"
 python3_pip="python3-pip"
-
-gatelog="gate.log"
-gpslog="gps.log"
-dbslog="dbs.log"
+rootlog="log"
+syslog="${rootlog}/syslog"
+serverlog="${rootlog}/serverlog"
 
 fun_help() {
 cat <<EOF
@@ -43,6 +42,15 @@ EOF
 }
 
 fun_init() {
+
+	echo "********** initializing log file path **********"
+	echo " "
+	mkdir -p ${syslog}
+	echo ${syslog}
+	mkdir -p ${serverlog}
+	echo ${serverlog}
+
+	echo " "
 	echo "********** installing ${python_version} and pip **********"
 	echo " "
 	sudo ${cmd_install} -y ${python_version} &&
@@ -91,10 +99,11 @@ fun_start_all() {
 			echo "error: cannot match type with server ${SERVER_NUM}, ${index}"
 			exit
 		else
-			log_name="${server_type}.log"
+			log_name="${syslog}/${server_type}.log"
 			if [ -f ${log_name} ]
 			then
 				rm ${log_name}
+				touch ${log_name}
 			fi
 			echo "starting ${SERVER_NUM} ${index} > log in ${log_name}"
 			nohup ${python_version} -B server/main.py ${SERVER_NUM} ${index} > ${log_name} 2>&1 &
@@ -113,10 +122,11 @@ fun_start_single() {
 		echo "error: cannot match type with server ${SERVER_NUM}, ${index}"
 		exit
 	else
-		log_name="${server_type}.log"
+		log_name="${syslog}/${server_type}.log"
 		if [ -f ${log_name} ]
 		then
 			rm ${log_name}
+			touch ${log_name}
 		fi
 		echo "starting ${SERVER_NUM} ${index} > log in ${log_name}"
 		nohup ${python_version} -B server/main.py ${SERVER_NUM} ${index} > ${log_name} 2>&1 &

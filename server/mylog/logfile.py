@@ -31,7 +31,7 @@ else:
 
 LOG_FILE_ROOT_PATH = "log%sserverlog"%(DELIMITER)
 DEBUG_DIR = "debug"
-WARNING_DIR = "warring"
+WARNING_DIR = "warning"
 ERROR_DIR = "error"
 STACK_DIR = "stack"
 NOTIFY_DIR = "notify"
@@ -117,7 +117,7 @@ def InitLogFilePath():
 	for sDirName in lstPath:
 		sPath = "%s%s%s"%(sLogFilePath, DELIMITER, sDirName)
 		if not os.path.exists(sPath):
-			os.makedirs(sPath)
+			os.makedirs(sPath, exist_ok = True)
 
 def GetCommonLogHeader(sDir):
 	global LOCAL_FLAG, LOCAL_THREAD
