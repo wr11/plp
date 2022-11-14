@@ -93,6 +93,39 @@ fun_start_all() {
 
 	for index in ${array_server[@]} 
 	do
+		res=`ps -ef | grep -v grep | grep python3.11 | grep ${SERVER_NUM} | grep ${index} -w `
+		if [ -z "${res}" ]
+		then
+			server_type=`${python_version} -B server/conf.py 2 ${SERVER_NUM} ${index}`
+			if [ -z "${server_type}" ]
+			then
+				echo "error: cannot match type with server ${SERVER_NUM}, ${index}"
+				exit
+			else
+				log_name="${syslog}/${server_type}.log"
+				if [ -f ${log_name} ]
+				then
+					rm ${log_name}
+					touch ${log_name}
+				fi
+				echo "starting ${SERVER_NUM} ${index} > log in ${log_name}"
+				nohup ${python_version} -B server/main.py ${SERVER_NUM} ${index} > ${log_name} 2>&1 &
+			fi
+		else
+			echo "error: server ${SERVER_NUM} ${index} is still running"
+			exit
+		fi
+	done
+
+	echo "server start finish !!!"
+}
+
+fun_start_single() {
+	serverNum=$1
+	index=$2
+	res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+	if [ -z "${res}" ]
+	then
 		server_type=`${python_version} -B server/conf.py 2 ${SERVER_NUM} ${index}`
 		if [ -z "${server_type}" ]
 		then
@@ -108,44 +141,34 @@ fun_start_all() {
 			echo "starting ${SERVER_NUM} ${index} > log in ${log_name}"
 			nohup ${python_version} -B server/main.py ${SERVER_NUM} ${index} > ${log_name} 2>&1 &
 		fi
-	done
-
-	echo "server start finish !!!"
-}
-
-fun_start_single() {
-	serverNum=$1
-	index=$2
-	server_type=`${python_version} -B server/conf.py 2 ${SERVER_NUM} ${index}`
-	if [ -z "${server_type}" ]
-	then
-		echo "error: cannot match type with server ${SERVER_NUM}, ${index}"
-		exit
+		echo "server ${SERVER_NUM} ${index} start finish!!!"
 	else
-		log_name="${syslog}/${server_type}.log"
-		if [ -f ${log_name} ]
-		then
-			rm ${log_name}
-			touch ${log_name}
-		fi
-		echo "starting ${SERVER_NUM} ${index} > log in ${log_name}"
-		nohup ${python_version} -B server/main.py ${SERVER_NUM} ${index} > ${log_name} 2>&1 &
+		echo "error: server ${SERVER_NUM} ${index} is still running"
+		exit
 	fi
-	echo "server ${SERVER_NUM} ${index} start finish!!!"
 }
 
 fun_status_all(){
-	echo "status all"
-	echo "waiting for support"
-	ps -aux | grep python3.11| awk '{print $14}'
-	ps -aux | grep python3.11| awk '{print $15}'
+	echo "searching for server process ..."
+	res1=`${python_version} -B server/conf.py 1`
+	array_server=(${res1//,/ })
+	for index in ${array_server[@]} 
+	do
+		echo "server process: ${SERVER_NUM} ${index}"
+		res=`ps -ef | grep -v grep | grep python3.11 | grep ${SERVER_NUM} | grep ${index} -w `
+		result=`${python_version} -B server/conf.py 3 ${res}`
+		echo ${result}
+		echo ""
+	done
 }
 
 fun_status_single(){
 	serverNum=$1
 	index=$2
-	echo "${serverNum} ${index} status single"
-	echo "waiting for support"
+	echo "searching for server process ${serverNum} ${index} ..."
+	res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+	result=`${python_version} -B server/conf.py 3 ${res}`
+	echo ${result}
 }
 
 fun_log(){
@@ -159,14 +182,23 @@ fun_kill_all(){
 	echo "killing all server process ..."
 	ps -ef | grep "python3.11" | grep -v grep | awk '{print $2}' | xargs echo
 	ps -ef | grep "python3.11" | grep -v grep | awk '{print $2}' | xargs kill -9
-	echo "all server processes have been killed, quit..."
+	echo "all server processes have been killed, quit"
 }
 
 fun_kill_single(){
 	serverNum=$1
 	index=$2
-	echo "${serverNum} ${index} kill single"
-	echo "waiting for support"
+	res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+	if [ -z "${res}" ]
+	then
+		echo "proccess ${SERVER_NUM} ${index} is not running"
+		exit
+	else
+		echo "killing ${serverNum} ${index} process"
+		ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs echo
+		ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs kill -9
+		echo "${serverNum} ${index} process has been killed"
+	fi
 }
 
 fun_resetdb(){

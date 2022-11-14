@@ -414,12 +414,31 @@ def LinuxGetServerType():
 		break
 	print(sResult)
 
+def LinuxAnalyseProcess():
+	import sys
+	lstProcessInfo = sys.argv[2:]
+	if not lstProcessInfo:
+		print("no proccess is running")
+		return
+	lstResult = []
+	for i, sStr in enumerate(lstProcessInfo):
+		if sStr == "server/main.py":
+			iServerNum = int(lstProcessInfo[i + 1])
+			iIndex = int(lstProcessInfo[i + 2])
+			iPID = int(lstProcessInfo[i - 8])
+			sInfo = "PID:%s SERVERNUM:%s INDEX:%s"%(iPID, iServerNum, iIndex)
+			lstResult.append(sInfo)
+
+	print(" , ".join(lstResult))
+
+
 
 if __name__ == "__main__":
 	"""
 	用于linux端(win端不执行)获取服务器配置等(交互序号按顺序后移即可)
 	1: 获取需要启动的服务器的服务器编号和进程索引
 	2: 通过服务器编号和进程索引获取改服务器进程的类型名称
+	3: 分析进程信息
 	"""
 	import os
 	import sys
@@ -429,3 +448,5 @@ if __name__ == "__main__":
 			LinuxGetServerConf()
 		if args == "2":
 			LinuxGetServerType()
+		if args == "3":
+			LinuxAnalyseProcess()
