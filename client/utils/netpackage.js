@@ -1,6 +1,7 @@
 /*
 网络数据打包工具
 注意: 打包整形数据时，如果确定整数大小则尽量使用具体的PacketAddInt8，PacketAddInt16，PacketAddInt32，不知道具体大小再使用PacketAddInt
+PacketAddJSON,UnpackJSON效率较低，尽量少使用，数据结构很复杂时候再使用
 */
 
 import {ARRAYBUFFER_UTILS, STRING_ARRAYBUFFER} from 'handlebytes.js'
@@ -144,6 +145,11 @@ export const NetPack = {
     oNetPack.PackInto("S", arraybuffer)
   },
 
+  PacketAddJSON: function PacketAddJSON(data, oNetPack){
+    let sData = JSON.stringify(data)
+    this.PacketAddS(sData, oNetPack)
+  },
+
   PacketSend: function PacketSend(oNetPack){
     let app = getApp()
     oNetPack.PackAll()
@@ -201,5 +207,10 @@ export const NetPack = {
   UnpackS: function UnpackS(oNetPack){
     let iLen = this.UnpackInt(oNetPack)
     return oNetPack.Unpack("S", iLen)
+  },
+
+  UnpackJSON: function UnpackJSON(oNetPack){
+    let sData = this.UnpackS(oNetPack)
+    return JSON.parse(sData)
   }
 }

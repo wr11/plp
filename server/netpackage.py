@@ -8,6 +8,7 @@ from pubdefines import CallManagerFunc
 import struct
 import pubdefines
 import mq
+import json
 
 def NetPackagePrepare(byteContent = b""):
 	return CNetPackage(byteContent)
@@ -118,6 +119,13 @@ def PacketAddBool(bool, oNetPack):
 	if bool:
 		iVal = 1
 	PacketAddInt8(iVal, oNetPack)
+
+def PacketAddJSON(data, oNetPack):
+	"""
+	效率较低，尽量少使用，数据结构复杂时候再用
+	"""
+	sData = json.dumps(data, ensure_ascii=False)
+	PacketAddS(sData, oNetPack)
 
 def PacketSend(link, oNetPack):
 	import conf
@@ -239,6 +247,13 @@ def UnpackS(oNetPackage):
 		return UnpackC(oNetPackage)
 	else:
 		return oNetPackage.Unpack("%ss" % iLen).decode("utf-8")
+
+def UnpackJSON(oNetPackage):
+	"""
+	效率较低，尽量少使用，数据结构复杂时候再用
+	"""
+	sData = UnpackS(oNetPackage)
+	return json.loads(sData)
 
 
 """
