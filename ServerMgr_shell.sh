@@ -21,6 +21,7 @@ COMMANDS:
 	log					# 查看服务日志
 	kill					# 强制杀掉服务进程
 	resetdb					# 重置数据库
+	help					# 查看帮助信息
 
 OPTIONS:
 	start:
@@ -165,17 +166,33 @@ fun_status_all(){
 fun_status_single(){
 	serverNum=$1
 	index=$2
-	echo "searching for server process ${serverNum} ${index} ..."
-	res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
-	result=`${python_version} -B server/conf.py 3 ${res}`
-	echo ${result}
+	server_type=`${python_version} -B server/conf.py 2 ${serverNum} ${index}`
+	if [ -z "${server_type}" ]
+	then
+		echo "error: cannot match type with server ${serverNum}, ${index}"
+		exit
+	else
+		echo "searching for server process ${serverNum} ${index} ..."
+		res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+		result=`${python_version} -B server/conf.py 3 ${res}`
+		echo ${result}
+	fi
 }
 
 fun_log(){
+	# -D -E -N -W -S
 	type=$1
 	filename=$2
-	echo "${type} ${filename} log"
-	echo "waiting for support"
+	path=""
+	case ${type} in
+		-D) path="${serverlog}/debug" ; break ;;
+		-E) path="${serverlog}/error" ; break ;;
+		-N) path="${serverlog}/notify" ; break ;;
+		-W) path="${serverlog}/stack" ; break ;;
+		-S) path="${serverlog}/warning" ; break ;;
+		*) echo "error: invalid log type" ; exit 1 ;;
+	esac
+	cat ${path}/${filename}
 }
 
 fun_kill_all(){
@@ -188,16 +205,23 @@ fun_kill_all(){
 fun_kill_single(){
 	serverNum=$1
 	index=$2
-	res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
-	if [ -z "${res}" ]
+	server_type=`${python_version} -B server/conf.py 2 ${serverNum} ${index}`
+	if [ -z "${server_type}" ]
 	then
-		echo "proccess ${SERVER_NUM} ${index} is not running"
+		echo "error: cannot match type with server ${serverNum}, ${index}"
 		exit
 	else
-		echo "killing ${serverNum} ${index} process"
-		ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs echo
-		ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs kill -9
-		echo "${serverNum} ${index} process has been killed"
+		res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+		if [ -z "${res}" ]
+		then
+			echo "proccess ${SERVER_NUM} ${index} is not running"
+			exit
+		else
+			echo "killing ${serverNum} ${index} process"
+			ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs echo
+			ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs kill -9
+			echo "${serverNum} ${index} process has been killed"
+		fi
 	fi
 }
 
@@ -258,6 +282,8 @@ case $1 in
 	;;
 
 	resetdb) fun_resetdb ; exit $? ;;
+
+	help) fun_help ; exit 1 ;;
 
 	*) fun_help ; exit 1 ;;
 esac
