@@ -13,7 +13,8 @@ Page({
    */
   data: {
     progress_percent : 0,
-    wxlogincode : ""
+    wxlogincode : "",
+    hidden : true
   },
 
   /**
@@ -256,7 +257,9 @@ Page({
     }
     let bAuth = NetPack.UnpackBool(oNetPack)
     console.log("auth ------------", bAuth)
-    app.globalData.auth = true
+    app.globalData.auth = bAuth
+
+    this.setData({hidden: !app.globalData.auth})
     this.updateProgress(100)
   },
 

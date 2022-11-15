@@ -6,7 +6,7 @@
 />
 <button bindtap="GetAPZ">get a pz</button>
 
-<movable-area class="movable-area">
+<movable-area class="movable-area" hidden="{{hidden}}">
     <movable-view class="movable-view" direction="all">
       <text class='gmtext' bindtap='openGM' >GM</text>
     </movable-view>
