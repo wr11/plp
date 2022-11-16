@@ -94,7 +94,7 @@ fun_start_all() {
 
 	for index in ${array_server[@]} 
 	do
-		res=`ps -ef | grep -v grep | grep python3.11 | grep ${SERVER_NUM} | grep ${index} -w `
+		res=`ps -ef | grep -v grep | grep ${python_version} | grep ${SERVER_NUM} | grep ${index} -w `
 		if [ -z "${res}" ]
 		then
 			server_type=`${python_version} -B server/conf.py 2 ${SERVER_NUM} ${index}`
@@ -124,7 +124,7 @@ fun_start_all() {
 fun_start_single() {
 	serverNum=$1
 	index=$2
-	res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+	res=`ps -ef | grep -v grep | grep ${python_version} | grep ${serverNum} | grep ${index} -w `
 	if [ -z "${res}" ]
 	then
 		server_type=`${python_version} -B server/conf.py 2 ${SERVER_NUM} ${index}`
@@ -156,7 +156,7 @@ fun_status_all(){
 	for index in ${array_server[@]} 
 	do
 		echo "server process: ${SERVER_NUM} ${index}"
-		res=`ps -ef | grep -v grep | grep python3.11 | grep ${SERVER_NUM} | grep ${index} -w `
+		res=`ps -ef | grep -v grep | grep ${python_version} | grep ${SERVER_NUM} | grep ${index} -w `
 		result=`${python_version} -B server/conf.py 3 ${res}`
 		echo ${result}
 		echo ""
@@ -173,7 +173,7 @@ fun_status_single(){
 		exit
 	else
 		echo "searching for server process ${serverNum} ${index} ..."
-		res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+		res=`ps -ef | grep -v grep | grep ${python_version} | grep ${serverNum} | grep ${index} -w `
 		result=`${python_version} -B server/conf.py 3 ${res}`
 		echo ${result}
 	fi
@@ -197,8 +197,8 @@ fun_log(){
 
 fun_kill_all(){
 	echo "killing all server process ..."
-	ps -ef | grep "python3.11" | grep -v grep | awk '{print $2}' | xargs echo
-	ps -ef | grep "python3.11" | grep -v grep | awk '{print $2}' | xargs kill -9
+	ps -ef | grep ${python_version} | grep -v grep | awk '{print $2}' | xargs echo
+	ps -ef | grep ${python_version} | grep -v grep | awk '{print $2}' | xargs kill -9
 	echo "all server processes have been killed, quit"
 }
 
@@ -211,15 +211,15 @@ fun_kill_single(){
 		echo "error: cannot match type with server ${serverNum}, ${index}"
 		exit
 	else
-		res=`ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w `
+		res=`ps -ef | grep -v grep | grep ${python_version} | grep ${serverNum} | grep ${index} -w `
 		if [ -z "${res}" ]
 		then
 			echo "proccess ${SERVER_NUM} ${index} is not running"
 			exit
 		else
 			echo "killing ${serverNum} ${index} process"
-			ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs echo
-			ps -ef | grep -v grep | grep python3.11 | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs kill -9
+			ps -ef | grep -v grep | grep ${python_version} | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs echo
+			ps -ef | grep -v grep | grep ${python_version} | grep ${serverNum} | grep ${index} -w | awk '{print $2}' |xargs kill -9
 			echo "${serverNum} ${index} process has been killed"
 		fi
 	fi
