@@ -1,0 +1,14 @@
+<view class="vView1">
+  <view class="hTitleView">
+    <input class="titleInput" placeholder="瓶子头" bindinput="GetTitle" />
+  </view>
+  <view class="hTagView">
+    <input class="tagInput" placeholder="瓶子标签" bindinput="GetTag" />
+  </view>
+  <view class="hContentView">
+    <textarea class="contentInput" placeholder="瓶子内容" bindinput="GetContent"></textarea>
+  </view>
+</view>
+<view class="hEnsureView">
+  <button class="ensureBtn" bindtap="EnsurePack">丢</button>
+</view>

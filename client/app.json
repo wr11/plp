@@ -1,12 +1,13 @@
 {
   "pages": [
+    "pages/main/main",
+    "pages/content/content",
     "pages/game/game",
     "pages/user/user",
     "pages/login/login",
     "pages/loading/loading",
     "pages/gm/gm"
   ],
-  "entryPagePath": "pages/loading/loading",
   "window": {
     "navigationBarTitleText": "d-01",
     "navigationBarBackgroundColor": "#33CCFF",

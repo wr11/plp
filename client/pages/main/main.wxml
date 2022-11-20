@@ -1,0 +1,10 @@
+<view class="vVie1w">
+  <view class="vView2">
+    <text>xxx</text>
+  </view>
+
+  <view class="hView1">
+    <button class="pzBtn">捞瓶子</button>
+    <button class="pzBtn" bindtap="SetBottle">丢瓶子</button>
+  </view>
+</view>
