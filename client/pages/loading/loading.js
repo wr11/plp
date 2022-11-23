@@ -45,7 +45,7 @@ Page({
       timingFunction: "ease"
     })
     this.animation_checkin = wx.createAnimation({
-      duration: 800,
+      duration: 500,
       timingFunction: "ease"
     })
     this.drawPlpAnimation()
@@ -114,7 +114,7 @@ Page({
     let flag = true
     setInterval(() => {
       if (flag) {
-        this.animation_checkin.scale(0.9).step()
+        this.animation_checkin.scale(0.8).step()
       } else{
         this.animation_checkin.scale(1).step()
       }
@@ -122,7 +122,7 @@ Page({
       this.setData({
         animation_checkin: this.animation_checkin.export()
       })
-    }, 800)
+    }, 500)
   },
 
   MakeConnection: function(){
