@@ -11,13 +11,6 @@
       "list": [
         {
           "name": "",
-          "pathName": "pages/login/login",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "",
           "pathName": "pages/gm/gm",
           "query": "",
           "launchMode": "default",

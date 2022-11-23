@@ -1,12 +1,22 @@
 <!--pages/loading/loading.wxml-->
-<text>pages/loading/loading.wxml</text>
-<progress percent="{{progress_percent}}" 
-  active active-mode="forwards" stroke-width="8" border-radius="30" duration = "5"
-  bindactiveend="finishLoad"
-/>
-<button bindtap="GetAPZ">get a pz</button>
+<view class="waveContainer">
+  <image class="wave" src="../../resource/img/bg_wave.gif"></image>
+  <image src="../../resource/img/plpicon.png" class="plpIcon" animation="{{animation_plp}}"></image>
+</view>
 
-<movable-area class="movable-area" hidden="{{hidden}}">
+<view class="topView">
+  <view class="placeHolder1" hidden="{{!hidden_loading}}"></view>
+  <view class="progressView">
+    <image src="../../resource/img/loading.gif" class = "loadingIcon" hidden="{{hidden_loading}}"></image>
+    <progress percent="{{progress_percent}}" 
+    active active-mode="forwards" stroke-width="6" duration = "3"
+    bindactiveend="finishLoad" class="progress" border-radius = "5" />
+    <!-- <button bindtap="GetAPZ">get a pz</button> -->
+  </view>
+  <text class = "checkInText" hidden = "{{!hidden_loading}}" animation="{{animation_checkin}}" bindtap = "GotoGame">点击进入</text>
+</view>
+
+<movable-area class="movable-area" hidden="{{hidden_gm}}">
     <movable-view class="movable-view" direction="all">
       <text class='gmtext' bindtap='openGM' >GM</text>
     </movable-view>

@@ -14,7 +14,10 @@ Page({
   data: {
     progress_percent : 0,
     wxlogincode : "",
-    hidden : true
+    hidden_gm : true,
+    animation_plp : {},
+    animation_checkin : {},
+    hidden_loading : false,
   },
 
   /**
@@ -37,6 +40,16 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onLoad() {
+    this.animation_plp = wx.createAnimation({
+      duration: 800,
+      timingFunction: "ease"
+    })
+    this.animation_checkin = wx.createAnimation({
+      duration: 800,
+      timingFunction: "ease"
+    })
+    this.drawPlpAnimation()
+    this.drawCheckInAnimation()
     wx.hideHomeButton({
       success: (res) => {},
     })
@@ -80,6 +93,36 @@ Page({
    */
   onShareAppMessage() {
 
+  },
+
+  drawPlpAnimation: function(){
+    let flag = true
+    setInterval(() => {
+      if (flag) {
+        this.animation_plp.translateY(10).step()
+      } else{
+        this.animation_plp.translateY(0).step()
+      }
+      flag = !flag
+      this.setData({
+        animation_plp: this.animation_plp.export()
+      })
+    }, 800)
+  },
+
+  drawCheckInAnimation: function(){
+    let flag = true
+    setInterval(() => {
+      if (flag) {
+        this.animation_checkin.scale(0.9).step()
+      } else{
+        this.animation_checkin.scale(1).step()
+      }
+      flag = !flag
+      this.setData({
+        animation_checkin: this.animation_checkin.export()
+      })
+    }, 800)
   },
 
   MakeConnection: function(){
@@ -259,13 +302,14 @@ Page({
     console.log("auth ------------", bAuth)
     app.globalData.auth = bAuth
 
-    this.setData({hidden: !app.globalData.auth})
+    this.setData({hidden_gm: !app.globalData.auth})
     this.updateProgress(100)
   },
 
   finishLoad(){
     if (this.data.progress_percent == 100){
       setTimeout(this.finishLoad2, 300)
+      this.setData({hidden_loading : true})
     }
   },
 
@@ -278,8 +322,8 @@ Page({
   },
 
   GotoGame(){
-    wx.navigateTo({
-      url: '../gm/gm',
+    wx.redirectTo({
+      url: '../main/main',
     })
   },
 

@@ -1,4 +1,57 @@
 /* pages/loading/loading.wxss */
+.topView{
+  display: flex;
+  flex-direction: column;
+}
+
+.placeHolder1{
+  height:290rpx;
+}
+
+.progressView{
+  display: flex;
+  flex-direction: column;
+}
+
+.plpIcon{
+  height:300rpx;
+  width: 300rpx;
+  padding-left: 230rpx;
+}
+
+.loadingIcon{
+  height:100rpx;
+  width: 250rpx;
+  padding-left: 270rpx;
+  padding-top: 190rpx;
+}
+
+.checkInText{
+  padding-top: 30rpx;
+  padding-left: 300rpx;
+}
+
+.waveContainer{
+  position: relative;
+  height: 210rpx;
+  background: linear-gradient(to top, #56ccf2, #2f80ed);
+  padding-top: 350rpx;
+}
+
+.wave{
+  position: absolute;
+  width: 100%;
+  mix-blend-mode: screen;
+  height: 160rpx;
+  padding-top: 50rpx;
+}
+
+.progress{
+  width: 700rpx;
+  padding-left: 30rpx;
+  padding-top: 15rpx;
+}
+
 .gmtext{
   background-color: #3ba3ed;
   height: 70rpx;
