@@ -32,7 +32,8 @@ App({
     userinfo : null,
     tcpconn : null,
     connectstate : false,
-    auth : false
+    auth : false,
+    noOperate : false
   },
 
   getTcpConnect: function(){

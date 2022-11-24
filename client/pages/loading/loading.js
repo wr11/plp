@@ -138,14 +138,25 @@ Page({
         console.log("connect to server success",SERVER_IP,SERVER_PORT)
         app.globalData.connectstate = true
         let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_HELLO, that.onServerHello)
-        NetPack.PacketAddInt(1314, oNetPack)
-        NetPack.PacketAddS("hello from client", oNetPack)
         NetPack.PacketSend(oNetPack)
+        setInterval(
+          function(){
+            console.log("check operate",app.globalData.noOperate,app.getConnectState())
+            if (app.globalData.noOperate && app.getConnectState()){
+              let conn = app.getTcpConnect()
+              conn.close()
+            }
+            app.globalData.noOperate = true
+          },
+          1000 * 60 * 20
+        )
+        app.globalData.noOperate = true
       })
     oTcp.onMessage((message) => {
         let oNetPack = NetPack.UnpackPrepare(message.message)
         let header = NetPack.UnpackInt16(oNetPack)
         netCommand(header, oNetPack)
+        app.globalData.noOperate = false
     })
     oTcp.onClose(() => {
         console.log("disconnected with server",SERVER_IP,SERVER_PORT)

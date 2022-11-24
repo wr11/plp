@@ -159,6 +159,7 @@ export const NetPack = {
     }
     let conn = app.getTcpConnect()
     conn.write(oNetPack.m_ArrayBuffer)
+    app.globalData.noOperate = false
   },
 
   UnpackPrepare: function UnpackPrepare(arraybuffer){
