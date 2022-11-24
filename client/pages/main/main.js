@@ -1,11 +1,18 @@
 // pages/main/main.ts
+
+import {NetPack} from '../../utils/netpackage.js'
+import {PROTOCOL} from '../../utils/protocol.js'
+
+let app = getApp()
+
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-
+    text : "sss",
+    hidden_gm : !app.globalData.auth,
   },
 
   SetBottle: function(e) {
@@ -13,6 +20,21 @@ Page({
     wx.navigateTo({
       url: "/pages/content/content"
     })
+  },
+
+  getPlp: function(){
+    let oNetPack = NetPack.PacketPrepare(PROTOCOL.CS_GETPZ, this.showPlpInfo)
+    NetPack.PacketSend(oNetPack)
+  },
+
+  showPlpInfo: function(state, oNetPack) {
+    if (state == -1){
+      console.log("fail")
+      return
+    }
+    let data = NetPack.UnpackJSON(oNetPack)
+    let sData = JSON.stringify(data)
+    this.setData({text:sData})
   },
 
   /**
@@ -33,7 +55,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    this.setData({hidden_gm : !app.globalData.auth,})
   },
 
   /**
@@ -69,5 +91,11 @@ Page({
    */
   onShareAppMessage() {
 
+  },
+
+  openGM(){
+    wx.navigateTo({
+      url: '../gm/gm',
+    })
   }
 })

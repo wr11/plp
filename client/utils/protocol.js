@@ -11,4 +11,5 @@ export const PROTOCOL = {
   S2C_OFFLINE : 0x1008,
 
   CS_GETPZ: 0x1009,
+  C2S_SENDPLP : 0x1010,
 }

@@ -10,7 +10,7 @@ from protocol import S2C_OFFLINE
 import rpc,conf
 import weakref
 
-INTERVAL_SAVEPLAYERS = 2 * 24 * 3600
+INTERVAL_SAVEPLAYERS = 2
 
 if "PLAYER_LIST" not in globals():
 	PLAYER_LIST = {}

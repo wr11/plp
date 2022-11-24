@@ -18,7 +18,8 @@ GPS_PROTOCOL_COMMAND = {
 	C2S_GMORDER: gm.ExecGMOrder,
 	C2S_TOASTCB: common.TipAnswer,
 	C2S_MODALCB: common.TipAnswer,
-	CS_GETPZ: plp.Test,
+	CS_GETPZ: plp.NetCommand,
+	C2S_SENDPLP: plp.NetCommand,
 
 }
 
@@ -106,7 +107,7 @@ def GPSNetCommand(oResPonse, iConnectID, data):
 	global GPS_PROTOCOL_COMMAND
 	func = GPS_PROTOCOL_COMMAND.get(iDataHeader, None)
 	if func:
-		func(who, oNetPackage)
+		func(who, oNetPackage, iDataHeader)
 
 def GateHandle(iConnectID, iDataHeader):
 	if not conf.IsGate():

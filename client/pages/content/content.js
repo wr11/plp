@@ -1,4 +1,10 @@
 // pages/content/content.ts
+
+import {NetPack} from '../../utils/netpackage.js'
+import {PROTOCOL} from '../../utils/protocol.js'
+
+let app = getApp()
+
 Page({
 
   /**
@@ -8,6 +14,7 @@ Page({
     title: "",
     tag: "",
     content: "",
+    hidden_gm : !app.globalData.auth,
   },
 
   GetTitle: function(e) {
@@ -36,6 +43,19 @@ Page({
     console.log(this.data.title)
     console.log(this.data.tag)
     console.log(this.data.content)
+    if (this.data.title.length == 0 || this.data.tag == 0 || this.data.content == 0) {
+      wx.showToast({
+        title: "请填写内容",
+        icon: "none",
+      })
+      return
+    }
+    let data = {
+      "title" : this.data.title,
+      "tag" : this.data.tag,
+      "content" : this.data.content
+    }
+    this.C2SSendPlp(data)
   },
 
   /**
@@ -56,7 +76,7 @@ Page({
    * 生命周期函数--监听页面显示
    */
   onShow() {
-
+    this.setData({hidden_gm : !app.globalData.auth,})
   },
 
   /**
@@ -92,5 +112,17 @@ Page({
    */
   onShareAppMessage() {
 
+  },
+
+  C2SSendPlp(data) {
+    let oNetPack = NetPack.PacketPrepare(PROTOCOL.C2S_SENDPLP)
+    NetPack.PacketAddJSON(data, oNetPack)
+    NetPack.PacketSend(oNetPack)
+  },
+
+  openGM(){
+    wx.navigateTo({
+      url: '../gm/gm',
+    })
   }
 })

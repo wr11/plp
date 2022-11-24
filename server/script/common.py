@@ -77,7 +77,7 @@ def OpenTips(sOpenID, iType, sDesc, *args, **kwargs):
 	elif iType == 2:
 		S2CShowModal(sOpenID, sDesc, *args, **kwargs)
 
-def TipAnswer(who, oNetPack):
+def TipAnswer(who, oNetPack, iDataHeader):
 	iType = UnpackInt8(oNetPack)
 	sDesc = UnpackS(oNetPack)
 	dFunc = getattr(who, "_TipAnswer", {})

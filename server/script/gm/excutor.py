@@ -8,7 +8,7 @@ from script.gm.defines import IsAuth
 import netpackage as np
 import conf
 
-def ExecGMOrder(who, oNetPackage):
+def ExecGMOrder(who, oNetPackage, iDataHeader):
 	sOpenID = who.m_OpenID
 	if not IsAuth(sOpenID):
 		OpenTips(who.m_OpenID, 1, "", "none", "当前账号无GM权限")

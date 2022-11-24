@@ -12,3 +12,9 @@
 <view class="hEnsureView">
   <button class="ensureBtn" bindtap="EnsurePack">丢</button>
 </view>
+
+<movable-area class="movable-area" hidden="{{hidden_gm}}">
+    <movable-view class="movable-view" direction="all">
+      <text class='gmtext' bindtap='openGM' >GM</text>
+    </movable-view>
+</movable-area>

@@ -1,10 +1,16 @@
 <view class="vVie1w">
   <view class="vView2">
-    <text>xxx</text>
+    <text>{{text}}</text>
   </view>
 
   <view class="hView1">
-    <button class="pzBtn">捞瓶子</button>
+    <button class="pzBtn" bindtap="getPlp">捞瓶子</button>
     <button class="pzBtn" bindtap="SetBottle">丢瓶子</button>
   </view>
 </view>
+
+<movable-area class="movable-area" hidden="{{hidden_gm}}">
+    <movable-view class="movable-view" direction="all">
+      <text class='gmtext' bindtap='openGM' >GM</text>
+    </movable-view>
+</movable-area>

@@ -6,7 +6,7 @@ import timer
 import rpc
 import conf
 
-SAVE_LISTCONTAINER = 4 * 24 * 3600
+SAVE_LISTCONTAINER = 4
 
 #List Container
 if "g_ListContainer" not in globals():

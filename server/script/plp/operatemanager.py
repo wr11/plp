@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from myutil.mycorotine import coroutine
+from myutil.mycorotine import coroutine, Return
 from script.plp.datactl import GetDatCtl
 from script.common import OpenTips
-from script.plp.defines import PUBLISHCNT_DAY, IDTYPE, PLP_PUBLISH_FLAG, PLP_GET_FLAG, GETCNT_DAY
+from script.plp.defines import PUBLISHCNT_DAY, IDTYPE, PLP_PUBLISH_FLAG, PLP_GET_FLAG, GETCNT_DAY, CAN_EMPTY
 from script.gameplay.basectl import GetGameCtl
 from myutil.myrandom import GetUniqueRandomIDList
+from protocol import CS_GETPZ
 
 import script.player as player
 import pubdefines
+import netpackage as np
 
 def Init():
 	oPlpManager = GetOperationManager()
@@ -33,8 +35,13 @@ class CPlpOeration:
 		if not oGameCtl:
 			PrintError("IDGenerator is not available!")
 			return
+		for key,val in dData.items():
+			if not val and key not in CAN_EMPTY:
+				OpenTips(who.m_OpenID, 1, "", "none", "请填写完整内容")
+				return
 		iID = oGameCtl.GenerateIDByType(IDTYPE)
 		dData["id"] = iID
+		dData["user"] = who.m_OpenID
 		oPlp = CPlp()
 		oPlp.Load(dData)
 		self.m_DataCtl.Append(iID, oPlp)
@@ -42,6 +49,7 @@ class CPlpOeration:
 		iOldCnt = who.QueryTimeLimitData(PLP_PUBLISH_FLAG, 0)
 		iOldCnt += 1
 		who.SetTimeLimitData(PLP_PUBLISH_FLAG, iOldCnt, "day5")
+		OpenTips(who.m_OpenID, 1, "", "success", "发布成功")
 
 	def ValidPublishPlp(self, who, dData):
 		iCnt = who.QueryTimeLimitData(PLP_PUBLISH_FLAG, 0)
@@ -73,21 +81,21 @@ class CPlpOeration:
 		sOpenID = who_proxy.m_OpenID
 		if not self.ValidGetPlp(who_proxy):
 			OpenTips(sOpenID, 1, "", "none", "无法查看")
-			return
+			raise Return({})
 		oGameCtl = GetGameCtl("IDGenerator")
 		if not oGameCtl:
 			PrintError("IDGenerator is not available!")
-			return
+			raise Return({})
 		if not hasattr(who_proxy, "m_SendedToClient"):
 			who_proxy.m_SendedToClient = []
 		lstSended = getattr(who_proxy, "m_SendedToClient", [])
 		iWay = who_proxy.GetPlpWay()
 		iMaxID = oGameCtl.GetCurIDByType(IDTYPE)
 		if iMaxID == 0:
-			return
+			raise Return({})
 		iMinID = yield self.m_DataCtl.GetMinID()
 		if iMinID == 0:
-			return
+			raise Return({})
 		iCnt = max(0, (GETCNT_DAY-who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)))
 		iTrueCnt = min(iCnt, 5)
 		lstPlpID = self.GetPlpIDList(iWay, lstSended, iMaxID, iMinID, iTrueCnt)
@@ -96,11 +104,13 @@ class CPlpOeration:
 		lstPlpData = yield self.m_DataCtl.GetMultiPlpData(lstPlpID)
 		PrintDebug("----",lstPlpData)
 		if not pubdefines.IsProxyExist(who_proxy):
-			return
+			raise Return({})
 		iLen = len(lstPlpData)
 		iOldCnt = who_proxy.QueryTimeLimitData(PLP_GET_FLAG, 0)
 		iOldCnt += iLen
-		who_proxy.SetTimeLimitData(PLP_GET_FLAG, iOldCnt, "day5")
+		# who_proxy.SetTimeLimitData(PLP_GET_FLAG, iOldCnt, "day5")
+		self.S2CSendPlpInfo(who_proxy.m_OpenID, lstPlpData)
+		raise Return(lstPlpData)
 
 	def GetPlpIDList(self, iWay, lstSended, iMaxID, iMinID, iCount):
 		#待优化，iCount很多时会占很大内存
@@ -116,6 +126,12 @@ class CPlpOeration:
 	def GetPlpCount(self):
 		ret = yield self.m_DataCtl.GetPlpCount()
 		PrintDebug(ret)
+
+
+	def S2CSendPlpInfo(self, sOpenID, data):
+		oNetPack = np.PacketPrepare(CS_GETPZ)
+		np.PacketAddJSON(data, oNetPack)
+		np.PacketSend(sOpenID, oNetPack)
 
 if "g_PlpOeration" not in globals():
 	g_PlpOeration = CPlpOeration()
