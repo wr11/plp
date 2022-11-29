@@ -55,7 +55,6 @@ def CreateNewGameShadow(oShadow):
 	oShadow.SaveToDataBase()
 
 def UpdateGameShadowData(oResponse, data):
-	PrintDebug("UpdateGameShadowData",data)
 	iRet = 0
 	try:
 		for sGameName, dData in data.items():
