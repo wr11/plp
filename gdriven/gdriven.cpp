@@ -1085,7 +1085,6 @@ void CLinuxHandler::Accept(int socket, struct sockaddr_in* client_addr, socklen_
         socket_user->AddSocketUser();
         socket_user->SetAddr((struct sockaddr *)client_addr);
 
-        //cb(socket);
         GPRINTD("accept success");
         CNet::ExcuteAcceptCallBack(socket_user);
     }
@@ -1125,7 +1124,6 @@ void CLinuxHandler::Receive(struct NetThread_Linux* nt, char* buffer, CNetBase *
                 auto socket_user = CSocketUser::GetSocketUser(nt->fd_socket);
                 if (socket_user){
                     (socket_user->_GetRecvBuffer())->Write(buffer, byte_len);
-                    //cb(socket_user);
                 }
                 else{
                     GPRINTE("no socket_user!");
