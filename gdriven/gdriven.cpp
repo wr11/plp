@@ -17,7 +17,7 @@
 
 #define EPOLL_OS __linux__ || __unix__
 
-#ifdef __win__
+#ifdef __WIN32__
 #include <ws2tcpip.h>
 #endif
 
