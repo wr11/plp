@@ -11,10 +11,9 @@ import conf
 
 if __name__ == "__main__":
 	iServerID, iIndex = sys.argv[1], sys.argv[2]
-
 	oConfInitFunc = Functor(conf.Init, int(iServerID), int(iIndex))
-	mq.Init()
 
+	mq.Init()
 	oSendMq = mq.GetMq(MSGQUEUE_SEND)
 	oRecvMq = mq.GetMq(MSGQUEUE_RECV)
 	oProcessNet = multiprocessing.Process(target = net.main, args=(oSendMq, oRecvMq, oConfInitFunc, ))

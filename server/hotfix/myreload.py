@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-
+"""
+模块已废弃！！！！
+"""
 from pubdefines import SERVER_DIR_ROOT
 
 import conf
@@ -27,15 +29,15 @@ def InitReloadFile():
 		PrintError("reload box is not ready!!")
 		return
 	PrintNotify("manul reload inited")
-	timer.Call_out(conf.GetManulReloadInterval(), "ManulReload", ManulReload)
+	timer.Call_out(conf.GetManualReloadInterval(), "ManulReload", ManulReload)
 
 def ManulReload():
 	import hotfix.reloadbox as reloadbox
 	from importlib import reload, import_module
 	oMod = reload(reloadbox)
-	lstReloadFile = getattr(oMod, "FILE_LIST", [])
+	lstReloadFile = getattr(oMod, "MODULE_LIST", [])
 	if not lstReloadFile:
-		timer.Call_out(conf.GetManulReloadInterval(), "ManulReload", ManulReload)
+		timer.Call_out(conf.GetManualReloadInterval(), "ManulReload", ManulReload)
 		return
 	PrintNotify("manul reloading %s"%str(lstReloadFile))
 	for sMod in lstReloadFile:
@@ -44,7 +46,7 @@ def ManulReload():
 		func = getattr(oNewModule, "OnReload", None)
 		if func:
 			func()
-	timer.Call_out(conf.GetManulReloadInterval(), "ManulReload", ManulReload)
+	timer.Call_out(conf.GetManualReloadInterval(), "ManulReload", ManulReload)
 
 def MyAutoReload():
 	LookFile(True, True)

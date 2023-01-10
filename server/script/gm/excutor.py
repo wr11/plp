@@ -202,8 +202,8 @@ def GMLookIDList(who):
 	PrintDebug("gm idgenerator", gameplay.GetGameCtl("IDGenerator").m_IDList)
 
 def GMTime(who):
-	PrintDebug("GetNowTime true", TimeStr(GetNowTime(True)), GetNowTime(True))
-	PrintDebug("GetNowTime false", TimeStr(GetNowTime()), GetNowTime())
+	PrintDebug("真实时间111", TimeStr(GetNowTime(True)), GetNowTime(True))
+	PrintDebug("游戏时间111", TimeStr(GetNowTime()), GetNowTime())
 
 def GMPushTime(who, iVal):
 	SetTimeOffset(iVal)

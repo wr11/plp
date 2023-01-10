@@ -3,8 +3,11 @@
 import time
 import weakref
 import collections
+import os
 
 #全局注释
+#根路径
+SERVER_DIR = os.getcwd()
 
 #根目录名称
 SERVER_DIR_ROOT = "server"

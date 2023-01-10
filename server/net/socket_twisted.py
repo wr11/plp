@@ -11,7 +11,6 @@ import timer
 import mq
 import conf
 import mylog
-import hotfix
 
 if "g_Connect" not in globals():
 	g_Connect = {}
@@ -166,7 +165,6 @@ def run(oSendMq, oRecvMq, oConfInitFunc):
 	global g_Connect
 	oConfInitFunc()
 	mylog.Init("NET")
-	hotfix.Init()
 
 	mq.SetMq(oSendMq, MSGQUEUE_SEND)
 	mq.SetMq(oRecvMq, MSGQUEUE_RECV)

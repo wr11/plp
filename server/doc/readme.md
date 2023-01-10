@@ -32,16 +32,16 @@ if "g_xxx" not in globals():
 定时器flag需要全局唯一，不可重复
 
 ## 热更规范
-热更分为手动热更和自动热更
-自动热更为服务器定时读取项目中所有文件进行热更新，在正式环境下不开启，debug环境下可以在conf中选择是否开启
-手动热更为服务器定时读取hotfix/reloadbox文件中的FILE_LIST，对其中模块进行热更，自动热更不开启则自动开启手动热更
+热更分为手动热更和自动热更，也可选择关闭（conf.py: "iReloadStat" :  0:不开启热更功能 1:自动热更 2:手动热更）
+自动热更会检测项目中文件更新时间，如果时间改变，则按照模块依赖进行热更，
+手动热更为服务器定时读取onlinereload/reloadbox文件中的MODULE_LIST，检测模块对应文件的更新时间，如果发生变化，则按照模块依赖进行热更。
 
-热更相关代码 hotfix 文件夹下，相关配置可以在conf.py下找到
-具体热更方式可以在hotfix下的文件中查看
+热更相关代码 onlinereload 文件夹下，相关配置可以在conf.py下找到
+具体热更方式可以在onlinereload下的文件中查看
 
 ## import规范
 import时统一从根目录开始（因为需要统一模块在sys.modules中的名字）
-如：import hotfix.myreload
+如：import onlinereload.monitor
 
 ## 打印规范
 开发中不要直接使用print打印，所有封装好的打印接口在mylog下的logcmd中

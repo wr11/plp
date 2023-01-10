@@ -37,8 +37,8 @@ SERVER_CONF = {
 		"iMaxReceiveNum" : 100,
 		"iInterval" : 0.1,
 
-		"bAutoReloadOpen" : True,		#在isdebug为true才会起作用，即正式环境永不开启autoreload
-		"iAutoReloadInterval" : 1.5,
+		"iReloadStat" : 1,				# 0:不开启热更功能 1:自动热更 2:手动热更
+		"iAutoReloadInterval" : 1,
 		"iManulReloadInterval" : 3,
 	},
 	"mysql" : {
@@ -237,13 +237,19 @@ def GetMaxSendNum():
 def GetMaxReceiveNum():
 	return SERVER_CONF["run_attr"]["iMaxReceiveNum"]
 
+def IsReloadOpen():
+	return SERVER_CONF["run_attr"]["iReloadStat"] > 0
+
 def IsAutoReloadOpen():
-	return SERVER_CONF["run_attr"]["bAutoReloadOpen"]
+	return SERVER_CONF["run_attr"]["iReloadStat"] == 1
+
+def IsManualReloadOpen():
+	return SERVER_CONF["run_attr"]["iReloadStat"] == 2
 
 def GetAutoReloadInterval():
 	return SERVER_CONF["run_attr"]["iAutoReloadInterval"]
 
-def GetManulReloadInterval():
+def GetManualReloadInterval():
 	return SERVER_CONF["run_attr"]["iManulReloadInterval"]
 
 def GetRedisConfig():

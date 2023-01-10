@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import onlinereload
+onlinereload.Enable(onlinereload.blacklist)
+
 from pubdefines import MSGQUEUE_SEND, MSGQUEUE_RECV, CallManagerFunc
 from timer import Call_out
 
@@ -7,7 +10,6 @@ import script.netcommand as netcommand
 import conf
 import script.gameinit as gameinit
 import script.link as link
-import hotfix
 import mylog
 
 def RecvMq_Handler():
@@ -25,7 +27,7 @@ def RecvMq_Handler():
 def run(oSendMq, oRecvMq, oConfInitFunc):
 	oConfInitFunc()
 	mylog.Init("SCR")
-	hotfix.Init()
+	onlinereload.Init()
 	link.Init()
 	mq.SetMq(oSendMq, MSGQUEUE_SEND)
 	mq.SetMq(oRecvMq, MSGQUEUE_RECV)
