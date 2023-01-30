@@ -389,6 +389,8 @@ class CSocketUser: public std::enable_shared_from_this<CSocketUser>
         int GetPort();
         int GetSocketFD();
 
+        struct NetThread_Linux* GetNetPtr();
+
         shared_ptr<CLoopBuffer> _GetRecvBuffer();
         shared_ptr<CLoopBuffer> _GetSendBuffer();
     private:
@@ -586,7 +588,7 @@ void CLinuxHandler::EventLoop(struct NetThread_Linux* nt, CNetBase *net_base)
                 struct NetThread_Linux* nt_new = (struct NetThread_Linux*)ev[i].data.ptr;
                 if (nt_new->fd_socket == nt->fd_socket)
                 {
-                    GPRINTD("wake up");
+                    // GPRINTD("wake up");
                     memset(client_addr, 0, sizeof(sizeof(struct sockaddr_in)));
                     memset(client_nt, 0, sizeof(struct NetThread_Linux));
                     this->Accept(nt->fd_socket, client_addr, &sock_len, nt->fd_epoll, client_nt);
@@ -651,7 +653,11 @@ void CSocketUser::SetAddr(struct sockaddr *addr)
 
 void CSocketUser::AddSocketUser()
 {
-    CSocketUser::__all_socket_map[this->_nt->fd_socket] = shared_from_this();
+    bool in_map = CSocketUser::__all_socket_map.find(this->_nt->fd_socket) != CSocketUser::__all_socket_map.end()? true:false;
+    if (!in_map)
+    {
+        CSocketUser::__all_socket_map[this->_nt->fd_socket] = shared_from_this();
+    }
 }
 
 shared_ptr<CLoopBuffer> CSocketUser::_GetRecvBuffer()
@@ -781,6 +787,11 @@ int CSocketUser::GetSocketFD()
 {
     return this->_nt->fd_socket;
 }
+
+struct NetThread_Linux* CSocketUser::GetNetPtr()
+{
+    return this->_nt;
+}
 //end region os
 
 typedef std::shared_ptr<CSocketUser> SocketUser;
@@ -884,7 +895,7 @@ void CNetBase::Run()
 
 void CNetBase::ThreadBoot(CNetBase* net_base, struct NetThread_Linux* nt)
 {
-    if (!net_base->_os_handler->HandleSocketListener(nt, EPOLLIN|EPOLLRDHUP|EPOLLET|EPOLLONESHOT, 1))
+    if (!net_base->_os_handler->HandleSocketListener(nt, EPOLLIN|EPOLLRDHUP|EPOLLET, 1))
     {
         GPRINTE("epoll add listener error!");
         perror("epoll add listener");
@@ -1079,13 +1090,14 @@ void CLinuxHandler::Accept(int socket, struct sockaddr_in* client_addr, socklen_
         client_nt->fd_epoll = epoll_fd;
         client_nt->fd_socket = client_fd;
         client_nt->writable = true;
-        this->HandleSocketListener(client_nt, EPOLLIN|EPOLLRDHUP|EPOLLET|EPOLLONESHOT, 1);
 
         shared_ptr<CSocketUser> socket_user = make_shared<CSocketUser>(client_nt);
         socket_user->AddSocketUser();
         socket_user->SetAddr((struct sockaddr *)client_addr);
 
-        GPRINTD("accept success");
+        this->HandleSocketListener(socket_user->GetNetPtr(), EPOLLIN|EPOLLRDHUP|EPOLLET|EPOLLONESHOT, 1);
+
+        // GPRINTD("accept success");
         CNet::ExcuteAcceptCallBack(socket_user);
     }
 }
@@ -1148,7 +1160,7 @@ void CLinuxHandler::Writeable(struct NetThread_Linux* nt, CNetBase *net_base)
 
 void AcceptCallBack2(SocketUser socket_user)
 {
-    GPRINTD("accept callback22222");
+    GPRINTD("my accept callback");
     char buff[_IP_INFO_LEN];
     cout << "IP: " << socket_user->GetIP(buff, _IP_INFO_LEN) << endl;
     cout << "Port: " << socket_user->GetPort() << endl;
